@@ -1228,6 +1228,19 @@ button.primary { border-color: var(--judge); }
   box-shadow: var(--shadow-hard);
 }
 #menu .big:hover { background: var(--gold-bright) !important; }
+#menu .big[disabled] {
+  background: var(--wood-panel) !important;
+  color: var(--parchment-dim) !important;
+  border-color: var(--wood-line) !important;
+  box-shadow: none;
+}
+#menu-note {
+  margin: calc(var(--s-5) * -1 + var(--s-2)) 0 var(--s-4);
+  color: var(--parchment-dim);
+}
+#menu-note.warn { color: var(--state-warn); }
+#menu-note:empty { display: none; }
+#menu .field[hidden] { display: none; }
 #menu .big:active { transform: translate(var(--press), var(--press)); box-shadow: none; }
 .replay-block {
   display: flex; align-items: flex-end; justify-content: space-between;
@@ -2051,7 +2064,14 @@ button.primary { border-color: var(--judge); }
       <span class="field-label">courtroom audio</span>
     </label>
 
+    <label class="field" id="access-field" hidden>
+      <span class="field-label">access code</span>
+      <input id="access-code" type="password" autocomplete="off" maxlength="200"
+             aria-label="Access code for live debates">
+    </label>
+
     <button type="button" id="open-court" class="primary big">Start the case</button>
+    <p class="fine" id="menu-note"></p>
 
     <div class="replay-block">
       <p class="field-label">replay a past case</p>
@@ -2341,6 +2361,51 @@ async function runToasts() {
   } finally {
     toasting = false;
   }
+}
+
+/* ---------------- usage limits ----------------
+   A live debate is a dozen or more paid gateway calls, so the server caps how
+   many run per UTC day and can require an access code. Replays, questions and
+   objections are outside both - the menu must stay useful once the cap is hit. */
+let LIMITS = { remaining: null, limit: null, access_required: false };
+let menuMessage = "";                /* a refusal the viewer has not acted on yet */
+const LIMIT_FALLBACK = "daily live-debate limit reached — replay a saved case instead";
+
+async function refreshLimits() {
+  try {
+    const res = await fetch("/limits");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    LIMITS = await res.json();
+  } catch {
+    LIMITS = { remaining: null, limit: null, access_required: false };   // unknown: do not block
+  }
+  paintLimits();
+  return LIMITS;
+}
+function paintLimits() {
+  const cta = document.getElementById("open-court");
+  const note = document.getElementById("menu-note");
+  const spent = LIMITS.remaining === 0;
+  const quota = (LIMITS.remaining != null && LIMITS.limit != null)
+    ? `${LIMITS.remaining} of ${LIMITS.limit} live debates left today`
+    : "";
+
+  cta.disabled = spent;
+  // The note carries whichever matters most: the cap, then a refusal, then the
+  // plain count. It stays in the menu - the status bar belongs to the stream.
+  note.textContent = spent ? (LIMITS.message || LIMIT_FALLBACK) : (menuMessage || quota);
+  note.classList.toggle("warn", spent || !!menuMessage);
+
+  // No code configured on the server: the field would be a dead box, so it goes.
+  document.getElementById("access-field").hidden = !LIMITS.access_required;
+}
+/* A 403 or 429 from POST /debate brings the viewer back to the menu with the
+   reason: the case never started, so the arena has nothing to show. */
+function refuseToMenu(message) {
+  menuMessage = message;
+  setStatus("Ready", false);
+  showMenu(true);
+  refreshLimits();
 }
 
 /* ---------------- the wager ----------------
@@ -3398,6 +3463,7 @@ async function play(event) {
   } else if (event.type === "done") {
     RUN_ID = event.run || RUN_ID;
     setStatus(event.error ? `Failed: ${event.error}` : "Debate complete", false);
+    refreshLimits();                   // one run fewer today
     paintObjectionButton();
   }
 }
@@ -3592,7 +3658,18 @@ function reset(rounds) {
 async function stream(url, options) {
   try {
     const res = await fetch(url, { ...options, signal: aborter.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 120)}`);
+    if (!res.ok) {
+      const body = await res.text();
+      let detail = body.slice(0, 160);
+      try { detail = JSON.parse(body).detail || detail; } catch { /* not JSON */ }
+      // The server refused to start the case: say so in the menu, not on an
+      // empty stage the viewer is now looking at.
+      if (res.status === 403 || res.status === 429) {
+        refuseToMenu(detail);
+        return;
+      }
+      throw new Error(`HTTP ${res.status} — ${detail}`);
+    }
     setStatus("Debate running…", true);
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -3655,11 +3732,18 @@ async function launch({ url, options, asset, rounds, intro }) {
   stopSinceClock();
 }
 
-document.getElementById("open-court").onclick = () => {
+document.getElementById("open-court").onclick = async () => {
   const asset = currentAsset();
   const asset_kind = currentKind();
   const rounds = Number(document.getElementById("rounds").value) || 2;
   renderAssetCard(asset);
+
+  // Ask before spending: if the day is used up the case never starts, so the
+  // menu says so instead of the stage going quiet.
+  menuMessage = "";                     // this click clears the last refusal
+  const limits = await refreshLimits();
+  if (limits.remaining === 0) return;
+
   aborter?.abort();                     // starting again abandons whatever is running
 
   // first user gesture: this is the only moment audio may start
@@ -3676,6 +3760,7 @@ document.getElementById("open-court").onclick = () => {
         asset_kind,        // "token" keeps EDGAR out: its ticker map would hit an ETF issuer
         rounds,
         seed_urls: [],     // EDGAR and DefiLlama build the pack from the ticker
+        access_code: document.getElementById("access-code").value,
       }),
     },
   });
@@ -3735,7 +3820,7 @@ fetch("/assets")
   .then(r => r.json())
   .then(data => { ASSETS = data || {}; })
   .catch(() => {})
-  .finally(() => { initPicker(); renderAssetCard(currentAsset()); selectBet(null); });
+  .finally(() => { initPicker(); renderAssetCard(currentAsset()); selectBet(null); refreshLimits(); });
 
 initStage();
 initHud(Number(document.getElementById("rounds").value) || null);

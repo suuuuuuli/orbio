@@ -1,0 +1,41 @@
+{
+  "asset": "HYPE",
+  "recorded_at": "20260918-210533",
+  "events": [
+    {
+      "type": "sources_added",
+      "round": 0,
+      "docs": [
+        {
+          "url": "assets://HYPE",
+          "title": "Hyperliquid (HYPE) reference data (as of 2026-09-18)",
+          "source_type": "reference",
+          "published_at": "2026-09-18",
+          "chars": 600
+        }
+      ],
+      "pack_size": 1
+    },
+    {
+      "type": "round_start",
+      "round": 1,
+      "rounds": 1
+    },
+    {
+      "type": "verdict",
+      "verdict": {
+        "thesis": "x",
+        "confidence": 0.4,
+        "falsifiers": [
+          "a"
+        ],
+        "final_budgets": {}
+      }
+    },
+    {
+      "type": "done",
+      "asset": "HYPE",
+      "run": "hype-20260918-210533"
+    }
+  ]
+}

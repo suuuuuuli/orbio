@@ -1,6 +1,7 @@
 """FastAPI: strumien przebiegu debaty (SSE) + odtwarzanie zapisanych przebiegow.
 
 POST /debate       - uruchamia debate i STREAMUJE zdarzenia w trakcie
+GET  /limits       - ile debat na zywo zostalo na dzis i czy potrzebny kod
 POST /objection    - wtracenie z widowni do TRWAJACEJ debaty
 POST /ask          - pytanie do zakonczonego (albo odtworzonego) przebiegu
 GET  /assets       - dane referencyjne aktywow z data/assets.json
@@ -17,8 +18,9 @@ demo na zywo nie moze zalezec od tego, czy bramka odpowie.
 import asyncio
 import json
 import queue
+import secrets
 import threading
-from datetime import datetime
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import AsyncIterator, Optional
 
@@ -27,7 +29,12 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from config import CREDIBILITY_BUDGET, ROUNDS
+from config import (
+    ACCESS_CODE,
+    CREDIBILITY_BUDGET,
+    MAX_LIVE_DEBATES_PER_DAY,
+    ROUNDS,
+)
 from debate import run_debate
 from judge import MAX_QUESTION_CHARS, answer_question
 from models import AgentState, AssetKind, Claim, DebateState
@@ -64,6 +71,63 @@ _ACTIVE: dict = {}
 _FINISHED: dict[str, tuple[DebateState, list[SourceDoc]]] = {}
 _FINISHED_LIMIT = 12
 
+# Licznik debat na zywo: {"day": data UTC, "count": ile}. Zerowany przy pierwszym
+# pytaniu po polnocy UTC - bez zadnego schedulera, bo stan zyje w pamieci.
+_LIVE_USAGE = {"day": datetime.now(timezone.utc).date(), "count": 0}
+
+LIMIT_MESSAGE = "daily live-debate limit reached - replay a saved case instead"
+CODE_MESSAGE = "invalid access code"
+
+
+def _roll_day() -> None:
+    today = datetime.now(timezone.utc).date()
+    if _LIVE_USAGE["day"] != today:
+        print(f"[api] nowa doba UTC ({today}) - licznik debat na zywo wyzerowany")
+        _LIVE_USAGE.update({"day": today, "count": 0})
+
+
+def _limits() -> dict:
+    """Stan limitu dla frontendu. Reset o polnocy UTC."""
+    _roll_day()
+    used = _LIVE_USAGE["count"]
+    midnight = datetime.combine(
+        _LIVE_USAGE["day"] + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc
+    )
+    return {
+        "used": used,
+        "limit": MAX_LIVE_DEBATES_PER_DAY,
+        "remaining": max(0, MAX_LIVE_DEBATES_PER_DAY - used),
+        "resets_at": midnight.isoformat(),
+        # sam fakt ustawienia kodu, nigdy jego wartosc
+        "access_required": bool(ACCESS_CODE),
+        "message": LIMIT_MESSAGE,
+    }
+
+
+def _check_access(code: str) -> None:
+    """Kod dostepu do debat na zywo. Porownanie stalym czasem, bez logowania kodu."""
+    if not ACCESS_CODE:
+        return                            # brak kodu w .env = tryb lokalny
+    if not secrets.compare_digest(code.strip(), ACCESS_CODE):
+        print("[api] POST /debate odrzucony: zly kod dostepu")
+        raise HTTPException(status_code=403, detail=CODE_MESSAGE)
+
+
+def _claim_live_slot() -> None:
+    """Zajmuje jedno z dziennych uruchomien albo konczy sie 429."""
+    _roll_day()
+    if _LIVE_USAGE["count"] >= MAX_LIVE_DEBATES_PER_DAY:
+        print(
+            f"[api] POST /debate odrzucony: limit {MAX_LIVE_DEBATES_PER_DAY} "
+            f"debat na zywo na dzis wyczerpany"
+        )
+        raise HTTPException(status_code=429, detail=LIMIT_MESSAGE)
+    _LIVE_USAGE["count"] += 1
+    print(
+        f"[api] debata na zywo {_LIVE_USAGE['count']}/{MAX_LIVE_DEBATES_PER_DAY} "
+        f"na dobe {_LIVE_USAGE['day']}"
+    )
+
 app = FastAPI(title="Arena - debata inwestycyjna")
 
 # Grafika sali i portrety agentow. Bez tego /assets/*.png zwraca 404.
@@ -82,6 +146,8 @@ class QuestionRequest(BaseModel):
 
 class DebateRequest(BaseModel):
     asset: str = Field(min_length=1, max_length=40)
+    # Kod dostepu sprawdzany TYLKO tutaj: /replay, /ask i /objection sa otwarte.
+    access_code: str = Field(default="", max_length=200)
     # "token" wylacza EDGAR - jego mapa tickerow trafia wtedy w emitenta ETF-u.
     asset_kind: AssetKind = "equity"
     rounds: int = Field(default=ROUNDS, ge=1, le=6)
@@ -173,6 +239,12 @@ def assets() -> dict:
         return {}
 
 
+@app.get("/limits")
+def limits() -> dict:
+    """Ile debat na zywo zostalo na dzis - menu blokuje przycisk na tej podstawie."""
+    return _limits()
+
+
 @app.get("/replays")
 def replays() -> dict:
     """Lista zapisanych przebiegow - nazwa bez .json trafia do /replay/{name}."""
@@ -186,6 +258,11 @@ def replays() -> dict:
 @app.post("/debate")
 async def debate(request: DebateRequest) -> StreamingResponse:
     """Uruchamia debate i streamuje zdarzenia W TRAKCIE jej trwania."""
+
+    # Kolejnosc ma znaczenie: bez kodu nie ma po co patrzec na limit, a slot
+    # zajmujemy PRZED zwrotem strumienia, bo model rusza razem z pierwsza runda.
+    _check_access(request.access_code)
+    _claim_live_slot()
 
     run_id = f"{request.asset.lower()}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 

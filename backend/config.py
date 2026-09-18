@@ -8,6 +8,10 @@ ORBIO_BASE_URL = os.getenv("ORBIO_BASE_URL")              # bramka w formacie An
 ORBIO_OPENAI_BASE_URL = os.getenv("ORBIO_OPENAI_BASE_URL")  # ta sama bramka, API OpenAI
 ORBIO_KEY = os.getenv("ORBIO_KEY")
 
+# Kod dostepu do uruchamiania debat na zywo. Pusty = bez kodu (tryb lokalny).
+# NIGDY nie loguj wartosci - do diagnostyki sluzy sam fakt ustawienia.
+ACCESS_CODE = (os.getenv("ACCESS_CODE") or "").strip()
+
 BULL_MODEL  = "google/gemini-3.1-pro-preview"
 BEAR_MODEL  = "openai/gpt-5.5"
 QUANT_MODEL = "openai/gpt-5.3-codex"
@@ -59,6 +63,12 @@ NO_EVIDENCE_PENALTY = 15
 EVIDENCE_BONUS = 1
 # Ile luk informacyjnych wolno zglosic jednemu agentowi w jednej rundzie.
 MAX_GAPS_PER_ROUND = 1
+
+# ---- LIMITY UZYCIA ----
+# Jedna debata to kilkanascie platnych wywolan bramki, wiec liczba uruchomien na
+# zywo jest ograniczona na dobe (reset o polnocy UTC). Odtwarzanie zapisow,
+# pytania i wtracenia limitu nie maja - nie wolaja modelu albo wolaja go raz.
+MAX_LIVE_DEBATES_PER_DAY = 20
 
 # ---- TIERY ZRODEL ----
 # Od najbardziej wiarygodnych (raporty skladane pod rygorem prawnym) do
