@@ -1,0 +1,3744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena — investment debate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — every value in the sheet below comes from here
+   ============================================================ */
+:root {
+  --font-pixel: "Silkscreen", "IBM Plex Mono", monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+
+  --t-2xs: 0.625rem;   /* 10px  chrome labels, ids */
+  --t-xs:  0.6875rem;  /* 11px  notes, code, loglines */
+  --t-sm:  0.75rem;    /* 12px  controls, column names */
+  --t-base:0.8125rem;  /* 13px  body, headlines */
+  --t-md:  0.9375rem;  /* 15px  claim text, bubbles */
+  --t-lg:  1.125rem;   /* 18px  credit numbers */
+  --t-xl:  1.375rem;   /* 22px  thesis, round counter */
+  --t-2xl: 1.75rem;    /* 28px  confidence readout, VS names */
+  --t-3xl: 2.5rem;     /* 40px  round interstitial */
+  --t-4xl: 3.5rem;     /* 56px  VS mark */
+
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-semibold: 600;
+  --w-bold: 700;
+
+  --lh-tight: 1.25;
+  --lh-snug: 1.45;
+  --lh-loose: 1.6;
+
+  --track-tight: -0.01em;
+  --track-wide: 0.06em;
+  --track-wider: 0.12em;
+
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+
+  /* palette: four greys, then role colour */
+  --ink: #06080a;
+  --panel: #0d1216;
+  --line: #2a3138;
+  --fg: #d3dae1;
+  --fg-dim: #767f89;
+
+  --bull: #8ae86a;         /* lime: clearly apart from the verified green */
+  --bear: #ff6a5e;
+  --judge: #b088ff;
+  --quant: #3fd0d8;
+
+  --state-ok: #44c86a;
+  --state-warn: #e0a72a;
+  --state-dead: #565e67;
+  --turn: #ffcc38;         /* the "who acts now" line */
+  --vol-ambient: 0.15;
+  --vol-ambient-ducked: 0.05;
+  --vol-drums: 0.5;
+  --vol-gavel: 0.45;
+
+  --scrim: rgb(6 8 10 / 25%);
+  --bubble-bg: rgb(10 13 16 / 72%);
+  --portrait-bg: rgb(10 13 16 / 35%);   /* raise this if the figures stop reading */
+  --portrait-outline:                   /* keeps them off the wooden background */
+    drop-shadow(0 0 2px rgb(0 0 0 / 90%)) drop-shadow(0 0 4px rgb(0 0 0 / 60%));
+  --shadow-hard: 4px 4px 0 rgb(0 0 0 / 55%);
+  --radius: 0;
+  --hairline: 1px;
+  --rail: 2px;
+  --rail-thick: 3px;
+  --press: 2px;
+  --dot: 0.625rem;        /* 10px square state block */
+
+  --sheet-max: 44rem;
+  --verdict-portrait: 26.25rem;   /* 420px winner / loser portraits */
+  --intro-portrait: 23.75rem;     /* 380px fighters on the fight card */
+  --intro-judge: 11rem;           /* the owl presides, smaller */
+  --asset-panel: 20rem;           /* reference card in the corner of the stage */
+  --dur-slide: 1100ms;
+  --step-6: steps(6, end);
+  --board-max: 110rem;     /* the record uses the full window */
+  --col-fighter: 1fr;
+  --col-judge: 0.8fr;
+  --col-gap: var(--s-5);
+  --page-x: var(--s-4);
+  --witness-col: 22rem;
+
+  --actor-w: 21rem;        /* 336px portraits (+20%) */
+  --actor-lift: 0.375rem;
+  --t-caption: 1.25rem;    /* 20px agent name under the portrait */
+  --mask-h: 13rem;         /* height of the strip drawn OVER the actors */
+  --fighter-lift: 3.125rem;   /* 50px: another 40px down the podium */
+  --actor-bottom: calc(var(--mask-h) + var(--fighter-lift));
+  --judge-bottom: 42.625rem;  /* -40px, still on the throne */
+  --bull-x: 22%;           /* 22% from the left edge, behind the left podium */
+  --bear-x: 78%;           /* 22% from the right edge */
+  --stage-focus: 68%;      /* vertical crop of the courtroom art */
+  --hit-shift: 0.375rem;   /* 6px portrait shake */
+  --bob-rise: 0.25rem;     /* 4px speaking bob */
+  --bob-scale: 1.02;
+  --dur-bob: 600ms;
+  --t-hit: 3rem;           /* 48px damage number */
+  --hit-rise: 3.75rem;     /* 60px of travel */
+  --hit-outline:
+    var(--press) 0 0 var(--ink), calc(var(--press) * -1) 0 0 var(--ink),
+    0 var(--press) 0 var(--ink), 0 calc(var(--press) * -1) 0 var(--ink),
+    var(--shadow-hard);
+  --cam-shift: 0.1875rem;  /* 3px camera shake */
+  --arena-blur: 8px;
+  --arena-scrim: rgb(27 20 16 / 82%);   /* warm wood, not grey */
+  --intro-scrim: rgb(27 20 16 / 45%);   /* the fight card keeps the room bright */
+  --wood: #1b1410;                      /* the record section ground */
+  --wood-panel: #2a1e17;                /* files on the table */
+  --wood-line: #0d0805;                 /* darker than the panel */
+  --parchment: #efe3cc;                 /* cream, not white */
+  --parchment-dim: #a89679;
+  --wood-lift: #3b2a20;                 /* one step lighter than the panel: hover */
+  --gold: #f2b32e;                      /* warm accent: the court's own colour */
+  --gold-bright: #ffd166;               /* hover, one step up */
+  --fade-h: 4rem;
+  --bubble-max: 21.25rem;  /* 340px */
+  --bubble-gap: var(--s-2);
+  --bubble-gap-tight: var(--press);
+  --bubble-stack: 3;       /* claims per agent per round */
+  --bubble-room-gap: 1.25rem; /* 20px clearance: the stack never touches the HUD */
+  --rope-h: 1.25rem;          /* the tug-of-war bar */
+  --menu-max: 45rem;          /* 720px menu panel */
+  --t-turn: 1.75rem;          /* 28px "who acts now" chip */
+  --t-cta: 1.5rem;            /* 24px START THE CASE */
+  --amount-w: 3rem;           /* 48px: all three stake buttons identical */
+  --toast-max: 26rem;         /* the confirmation pop-up */
+  --toast-top: 70%;           /* clear of the judge's portrait */
+  --toast-rise: 0.75rem;      /* how far it drifts up while fading in */
+  --dur-toast: 220ms;         /* fade in and out */
+  --sidebet-gap: 0.5rem;      /* how far under the caption the row sits */
+  --gallery-max: 60rem;       /* the question bar above the stage */
+  --t-bet: 2rem;              /* 32px bet settlement line */
+  --bull-light: #c4f5ad;      /* stake-at-risk shade, lighter than the role */
+  --bear-light: #ffb3ad;
+  --dur-pulse: 800ms;
+  --tail: 0.5rem;
+
+  --seg-count: 20;
+  --bar-min: 60;           /* bar empties here, so an 8 credit loss is visible */
+  --bar-max: 130;          /* bar is full here; the printed numbers stay real */
+  --seg-h: 0.75rem;
+  --seg-h-sm: 0.4375rem;
+  --seg-gap: var(--press);
+
+  --dur-fast: 120ms;
+  --dur-speak: 320ms;
+  --dur-card: 200ms;
+  --dur-hit: 400ms;
+  --dur-cam: 200ms;
+  --dur-hitnum: 2200ms;
+  --dur-strike: 600ms;
+  --dur-seg: 240ms;
+  --dur-slow: 640ms;
+  --dur-flash: 1200ms;
+  --dur-round: 1200ms;
+  --dur-vs: 2500ms;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --step-4: steps(4, end);
+  --step-8: steps(8, end);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--t-base);
+  line-height: var(--lh-snug);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono, .id, pre, .kind { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* pixel face: chrome only — never long prose */
+button, .brand, .col > h2, .record-title, .record-cue, .state, .id,
+.fighter .name, .round-box, .actor .caption,
+#intro .ticker, #intro .rounds, #intro .versus, #intro .hint, .product,
+#round-card .big, #round-card .sub, .eyebrow {
+  font-family: var(--font-pixel);
+  letter-spacing: var(--track-wide);
+}
+.eyebrow {
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+a { color: var(--quant); text-underline-offset: var(--press); }
+
+/* ---------------- scene: controls + HUD + stage fill the first screen ---------------- */
+#top {
+  position: relative;
+  display: flex; flex-direction: column;
+  min-height: 100svh;                   /* the arena starts below the fold */
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  image-rendering: pixelated;
+}
+#top::before { content: ""; position: absolute; inset: 0; background: var(--scrim); }
+#top::after {                           /* the only gradient in the sheet */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--fade-h);
+  background: linear-gradient(to bottom, rgb(6 8 10 / 0%), var(--ink));
+}
+#top::after { z-index: 3; }
+#controls, #hud { position: relative; z-index: 4; }
+#stage { position: relative; z-index: 1; }
+
+/* The lower strip of the artwork is painted again ON TOP of the portraits, so
+   the podiums and the bench stand in front of the figures behind them. */
+#top .mask {
+  position: absolute; inset: 0; z-index: 2;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  image-rendering: pixelated;
+  clip-path: inset(calc(100% - var(--mask-h)) 0 0 0);
+  filter: brightness(.75);
+  pointer-events: none;
+}
+
+/* one hit shakes the whole scene */
+#top.shaken { animation: cam-shake var(--dur-cam) var(--step-4); }
+@keyframes cam-shake {
+  0%, 100% { transform: none; }
+  33% { transform: translate(calc(var(--cam-shift) * -1), var(--cam-shift)); }
+  66% { transform: translate(var(--cam-shift), calc(var(--cam-shift) * -1)); }
+}
+
+/* ---------------- control bar ---------------- */
+#controls {
+  /* same parchment as the record and the verdict sheet */
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center;
+  padding: var(--s-2) var(--page-x);
+  background: var(--wood-panel);
+  border-bottom: var(--rail) solid var(--wood-line);
+  color: var(--parchment);
+}
+#controls input, #controls select, #controls button {
+  background: var(--wood);
+  border-color: var(--wood-line);
+  color: var(--parchment);
+}
+#controls button:hover:not(:disabled) { border-color: var(--parchment-dim); }
+#controls #status { color: var(--parchment-dim); }
+.brand { font-size: var(--t-sm); color: var(--fg); }
+.brand span { color: var(--judge); }
+.tagline { font-family: var(--font-mono); font-size: var(--t-2xs); color: var(--fg-dim); }
+
+input, select, button {
+  font-size: var(--t-sm);
+  color: var(--fg);
+  background: var(--ink);
+  border: var(--rail) solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--s-1) var(--s-2);
+}
+input, select { font-family: var(--font-mono); }
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: var(--rail) solid var(--judge);
+  outline-offset: var(--hairline);
+}
+button { cursor: pointer; box-shadow: var(--shadow-hard); }
+button:hover:not(:disabled) { border-color: var(--fg-dim); }
+button:active:not(:disabled) { box-shadow: none; transform: translate(var(--press), var(--press)); }
+button:disabled { opacity: .4; cursor: default; box-shadow: none; }
+button.primary { border-color: var(--judge); }
+#sound[aria-pressed="true"] { border-color: var(--turn); color: var(--turn); }
+
+#status { margin-left: auto; font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-dim); }
+#status.live::before {
+  content: "●"; margin-right: var(--s-1); color: var(--state-ok);
+  animation: blink 1s var(--step-4) infinite;
+}
+@keyframes blink { 50% { opacity: .15; } }
+
+/* ---------------- HUD ---------------- */
+#hud { padding: var(--s-3) var(--page-x) 0; }
+.hud-row {
+  display: grid;
+  grid-template-columns: var(--col-fighter) auto var(--col-fighter);
+  gap: var(--s-4);
+  align-items: end;
+}
+.fighter { --role: var(--fg-dim); min-width: 0; }
+.fighter[data-agent="bull"] { --role: var(--bull); text-align: right; }
+.fighter[data-agent="bear"] { --role: var(--bear); }
+.fighter .name {
+  display: flex; align-items: baseline; gap: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--role);
+  text-shadow: var(--shadow-hard);
+}
+.fighter[data-agent="bull"] .name { justify-content: flex-end; }
+.fighter .name .num { font-size: var(--t-lg); }
+.fighter .name .unit { font-size: var(--t-2xs); color: var(--fg-dim); }
+
+/* .bar still powers the verdict standings and the confidence track */
+.bar { position: relative; display: flex; gap: var(--seg-gap); height: var(--seg-h); margin-top: var(--s-2); }
+
+/* One rope, two sides: the split is bull / (bull + bear). Green pulls from the
+   left, red from the right, and the boundary moves on every settlement. */
+.rope {
+  position: relative;
+  display: flex;
+  height: var(--rope-h);
+  margin-top: var(--s-2);
+  background: var(--bear);
+  border: var(--rail) solid var(--wood-line);
+  box-shadow: var(--shadow-hard);
+}
+.rope-fill {
+  width: var(--split, 50%);
+  background: var(--bull);
+  transition: width var(--dur-bar) var(--step-8);
+}
+/* The slice of the rope an agent has put at risk this round. It pulses while the
+   claim is pending and stops the moment the judge rules on it - the bar itself
+   does not move until then, so nothing pre-empts the ruling. */
+.rope-stake {
+  position: absolute; top: 0; bottom: 0;
+  width: 0;
+  transition: width var(--dur-bar) var(--step-8), left var(--dur-bar) var(--step-8);
+}
+.rope-stake.live { animation: stake-pulse var(--dur-pulse) var(--step-4) infinite; }
+@keyframes stake-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+.rope-stake[data-stake="bull"] { background: var(--bull-light); }
+.rope-stake[data-stake="bear"] { background: var(--bear-light); }
+
+.at-stake {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--role);
+}
+.at-stake[hidden] { display: none; }
+
+.rope::after {                 /* centre mark: the 50/50 reference */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%;
+  width: var(--hairline);
+  background: var(--wood-line);
+}
+.seg {
+  flex: 1;
+  background: var(--role);
+  box-shadow: var(--shadow-hard);
+  transition: opacity var(--dur-seg) var(--step-4), background-color var(--dur-seg) var(--step-4);
+}
+.seg.spent { background: var(--line); opacity: .45; box-shadow: none; }
+
+.model {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.scale {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--fg-dim);
+  opacity: .8;
+}
+
+.round-box { text-align: center; padding: 0 var(--s-3); text-shadow: var(--shadow-hard); }
+.round-box .label { font-size: var(--t-2xs); text-transform: uppercase; color: var(--judge); }
+.round-box .count { font-size: var(--t-xl); color: var(--fg); }
+.round-box .count small { font-size: var(--t-sm); color: var(--fg-dim); }
+
+/* ---------------- stage ---------------- */
+#stage { flex: 1; min-height: 0; }      /* takes the rest of the first screen */
+.actor {
+  --role: var(--fg-dim);
+  position: absolute; bottom: var(--actor-bottom); margin: 0;
+  width: var(--actor-w);
+  text-align: center;
+  transform: translateX(-50%);
+  transition: transform var(--dur-speak) var(--step-4), filter var(--dur-speak) var(--step-4);
+}
+.actor[data-agent="bull"] { --role: var(--bull); left: var(--bull-x); }
+.actor[data-agent="bear"] { --role: var(--bear); left: var(--bear-x); }
+.actor[data-agent="judge"] {
+  --role: var(--judge); left: 50%;
+  bottom: var(--judge-bottom);
+}
+.actor .frame {
+  display: block; width: 100%; aspect-ratio: 1;
+  background: var(--portrait-bg);
+  border: var(--rail) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+  transition: border-color var(--dur-speak) var(--step-4);
+}
+.actor .frame img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  image-rendering: pixelated;
+  filter: var(--portrait-outline);
+}
+.actor .caption {
+  margin-top: var(--s-2);
+  font-size: var(--t-caption);     /* 20px: readable from the back row */
+  line-height: var(--lh-tight);
+  color: var(--role);
+  text-shadow: var(--shadow-hard);
+}
+.actor .caption small { display: block; font-size: var(--t-base); color: var(--fg-dim); }
+.actor.dimmed { filter: brightness(.5) saturate(.6); }
+.actor.speaking { filter: brightness(1.15); }
+.actor.speaking { transform: translateX(-50%) translateY(calc(var(--actor-lift) * -1)); }
+.actor.speaking .frame { border-color: var(--fg); animation: frame-flash var(--dur-hit) var(--step-4); }
+@keyframes frame-flash { 0%, 100% { border-color: var(--fg); } 50% { border-color: var(--role); } }
+
+/* while the line is being typed the portrait breathes; the frame carries the
+   animation, so it never fights the positioning transform on .actor */
+.actor.talking .frame { animation: speak-bob var(--dur-bob) steps(2, end) infinite; }
+@keyframes speak-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(calc(var(--bob-rise) * -1)) scale(var(--bob-scale)); }
+}
+
+/* taking damage: the portrait jerks and its frame flashes the state colour */
+.actor.struck { animation: portrait-shake var(--dur-hit) var(--step-4); }
+.actor.struck .frame { animation: strike-flash var(--dur-strike) var(--step-4) 3; }
+.actor.struck[data-hit="down"] .frame { border-color: var(--bear); }
+.actor.struck[data-hit="up"] .frame { border-color: var(--state-ok); }
+@keyframes portrait-shake {
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translateX(-50%) translateX(calc(var(--hit-shift) * -1)); }
+  50% { transform: translateX(-50%) translateX(var(--hit-shift)); }
+  75% { transform: translateX(-50%) translateX(calc(var(--hit-shift) * -0.5)); }
+}
+@keyframes strike-flash { 0%, 100% { border-color: currentColor; } 50% { border-color: var(--fg); } }
+
+/* the damage number: big, pixel, over the portrait */
+.hit-num {
+  position: absolute; bottom: calc(100% + var(--s-2)); left: 50%;
+  font-family: var(--font-pixel);
+  font-size: var(--t-hit);
+  text-shadow: var(--hit-outline);
+  pointer-events: none;
+  animation: hit-rise var(--dur-hitnum) var(--step-8) forwards;
+}
+.hit-num.down { color: var(--bear); }
+.hit-num.up { color: var(--state-ok); }
+@keyframes hit-rise {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(var(--s-3)); }
+  12%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75%  { opacity: 1; transform: translateX(-50%) translateY(calc(var(--hit-rise) * -0.7)); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(calc(var(--hit-rise) * -1)); }
+}
+
+/* the bar pulses along with the portrait */
+
+
+/* everything the agent said this round, stacked above its portrait:
+   newest at the bottom (closest to the head), older ones above and quieter */
+.bubbles {
+  position: absolute; bottom: calc(100% + var(--s-3));
+  left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  gap: var(--bubble-gap);
+  width: var(--bubble-max);
+  /* never clipped: fitStack() shrinks type and gaps, and as a last resort drops
+     the oldest line whole. Half a sentence on screen is worse than none. */
+  pointer-events: none;
+}
+.bubble {
+  position: relative;
+  padding: var(--s-2) var(--s-3);
+  background: var(--bubble-bg);
+  border: var(--rail) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  text-align: left;
+  animation: bubble-in var(--dur-card) var(--step-4);
+}
+@keyframes bubble-in { from { opacity: 0; transform: translateY(var(--s-2)); } }
+/* older lines: dimmer and a step smaller, still readable */
+.bubble.stale { opacity: .65; }
+.bubble.stale .said { font-size: var(--t-base); }
+.bubble .said {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--t-md);
+  line-height: var(--lh-snug);
+  color: var(--fg);
+}
+.bubble .figure-line {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.bubble .figure-line[hidden] { display: none; }
+/* block cursor while the line is being typed */
+.bubble.typing .said::after {
+  content: "\258C ";             /* block cursor; CSS hex escape, terminating space required */
+  margin-left: var(--hairline);
+  color: var(--role);
+  animation: blink 1s var(--step-4) infinite;
+}
+/* only the newest bubble carries the tail */
+.bubble:last-child::after, .bubble:last-child::before {
+  content: ""; position: absolute; top: 100%; left: 50%;
+  width: 0; height: 0;
+  border-left: var(--tail) solid transparent;
+  border-right: var(--tail) solid transparent;
+}
+.bubble:last-child::before {
+  margin-left: calc(var(--tail) * -1);
+  border-top: var(--tail) solid var(--role);
+}
+.bubble:last-child::after {
+  margin-left: calc(var(--tail) * -1 + var(--rail));
+  margin-top: calc(var(--rail) * -1);
+  border-left-width: calc(var(--tail) - var(--rail));
+  border-right-width: calc(var(--tail) - var(--rail));
+  border-top: calc(var(--tail) - var(--rail)) solid var(--bubble-bg);
+}
+/* two shrink levels, applied by fitStack() only when the stack needs them */
+.bubbles.tight { gap: var(--bubble-gap-tight); }
+.bubbles.tight .bubble { padding: var(--s-1) var(--s-3); }
+.bubbles.tight .bubble.stale .said { font-size: var(--t-base); }
+.bubbles.tight .bubble.stale .figure-line { display: none; }
+.bubbles.tighter { gap: var(--bubble-gap-tight); }
+.bubbles.tighter .bubble { padding: var(--s-1) var(--s-2); }
+.bubbles.tighter .said { font-size: var(--t-base); line-height: var(--lh-tight); }
+.bubbles.tighter .bubble.stale .said { font-size: var(--t-xs); }
+.bubbles.tighter .figure-line { display: none; }
+/* last resort before dropping a line: the smallest readable step */
+.bubbles.tightest { gap: 0; }
+.bubbles.tightest .bubble { padding: 0 var(--s-2); }
+.bubbles.tightest .said { font-size: var(--t-xs); line-height: var(--lh-tight); }
+.bubbles.tightest .bubble.stale .said { font-size: var(--t-2xs); }
+.bubbles.tightest .figure-line { display: none; }
+
+/* the judge sits too high for a stack above its head: its lines hang below the
+   portrait, newest on top, tail pointing up */
+.actor[data-agent="judge"] .bubbles {
+  top: calc(100% + var(--s-3)); bottom: auto;
+  flex-direction: column-reverse;
+}
+.actor[data-agent="judge"] .bubble:last-child::before,
+.actor[data-agent="judge"] .bubble:last-child::after {
+  top: auto; bottom: 100%; border-top: none;
+}
+.actor[data-agent="judge"] .bubble:last-child::before {
+  border-bottom: var(--tail) solid var(--role);
+}
+.actor[data-agent="judge"] .bubble:last-child::after {
+  margin-top: 0; margin-bottom: calc(var(--rail) * -1);
+  border-bottom: calc(var(--tail) - var(--rail)) solid var(--bubble-bg);
+}
+
+/* who the stream is waiting for */
+/* stage footer: the turn line sits above the record cue, clear of every
+   portrait and bubble */
+.stage-footer {
+  position: absolute; left: 50%; bottom: var(--s-3); transform: translateX(-50%);
+  z-index: 5;                      /* above the podium mask */
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-2);
+}
+/* who holds the floor: under the HUD, above the stage, in the role's colour */
+#turn {
+  position: relative; z-index: 5;
+  display: flex; justify-content: center; align-items: baseline; gap: var(--s-3);
+  margin: 0;
+  padding: var(--s-2) var(--page-x) 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-turn);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--turn-colour, var(--turn));
+  text-shadow: var(--hit-outline);
+}
+#turn .who { display: inline-flex; align-items: center; gap: var(--s-2); }
+#turn .meta {
+  display: inline-flex; gap: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+#turn[hidden] { display: none; }
+#turn .who::before {
+  content: ""; width: var(--dot); height: var(--dot);
+  background: currentColor;
+  animation: blink 1s var(--step-4) infinite;
+}
+
+/* hand-entered reference data, parked in the corner of the stage for the whole
+   debate. Deliberately styled like the record, not like the HUD: it is context,
+   not something the agents produced. */
+#asset-card {
+  /* bottom right, clear of the bear's bubble stack, above the record cue */
+  position: absolute; right: var(--page-x); bottom: var(--s-7); z-index: 5;
+  width: var(--asset-panel);
+}
+/* one component, two homes: the stage corner and the fight card */
+.asset-panel {
+  padding: var(--s-3);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail) solid var(--gold);
+  box-shadow: var(--shadow-hard);
+  color: var(--parchment);
+  text-align: left;
+}
+#intro .asset-panel { margin-bottom: var(--s-4); }
+.asset-panel .ticker {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xl);
+  line-height: var(--lh-tight);
+  color: var(--parchment);
+}
+.asset-panel .name {
+  margin: var(--s-1) 0 var(--s-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+.asset-panel dl {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s-1) var(--s-3);
+  margin: 0;
+}
+.asset-panel dt {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+.asset-panel dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-base);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--gold);                   /* reference figures read warm, not cyan */
+}
+.asset-panel .blurb {
+  margin: var(--s-3) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--t-xs);
+  line-height: var(--lh-snug);
+  color: var(--parchment);
+}
+.asset-panel .footnote {
+  margin: var(--s-3) 0 0;
+  padding-top: var(--s-2);
+  border-top: var(--hairline) solid var(--wood-line);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--parchment-dim);
+}
+
+/* cue: what is below the fold */
+.record-cue {
+  display: flex; align-items: center; gap: var(--s-2);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  background: var(--panel);
+}
+.record-cue:hover:not(:disabled) { color: var(--fg); }
+
+/* ---------------- arena: the record ---------------- */
+#arena {
+  /* the record is a wooden table with files on it: the card, headline and note
+     rules below are unchanged, they just resolve these tokens differently */
+  --panel: var(--wood-panel);
+  --line: var(--wood-line);
+  --fg: var(--parchment);
+  --fg-dim: var(--parchment-dim);
+  position: relative;
+  background: var(--wood);
+  border-top: var(--rail) solid var(--wood-line);
+  padding: var(--s-4) var(--page-x) var(--s-6);
+}
+/* same courtroom, blurred and darkened: one world, two levels of focus */
+#arena::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  filter: blur(var(--arena-blur));
+  pointer-events: none;
+}
+#arena::after {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: var(--arena-scrim);
+  pointer-events: none;
+}
+#arena > * { position: relative; z-index: 1; }
+.record-head {
+  max-width: var(--board-max); margin: 0 auto var(--s-3);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-3);
+}
+.record-title { font-size: var(--t-sm); color: var(--fg-dim); }
+.record-hint { font-family: var(--font-mono); font-size: var(--t-2xs); color: var(--fg-dim); }
+
+#board {
+  max-width: var(--board-max); margin: 0 auto;
+  display: grid;
+  grid-template-columns: var(--col-fighter) var(--col-judge) var(--col-fighter);
+  gap: var(--col-gap);
+  align-items: start;
+}
+.col { min-width: 0; }
+.col > h2 {
+  margin: 0 0 var(--s-3);
+  padding-bottom: var(--s-2);
+  border-bottom: var(--rail) solid var(--line);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--role);
+}
+.col[data-agent="bull"]  { --role: var(--bull); }
+.col[data-agent="bear"]  { --role: var(--bear); }
+.col[data-agent="judge"] { --role: var(--judge); }
+.col[data-agent="quant"] { --role: var(--quant); }
+
+#witness { max-width: var(--board-max); margin: var(--s-4) auto 0; }
+#witness .feed {
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: minmax(var(--witness-col), 1fr);
+  gap: var(--col-gap);
+  overflow-x: auto;
+  padding-bottom: var(--s-2);
+}
+#witness .feed:empty::after {
+  content: "No computations yet";
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--fg-dim);
+}
+
+/* ---------------- claim card: collapsed by default ---------------- */
+.card {
+  position: relative;
+  margin-bottom: var(--s-2);
+  background: var(--panel);
+  border: var(--rail) solid var(--line);
+  border-left: var(--rail-thick) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  animation: card-in var(--dur-card) var(--ease);
+}
+#witness .card { margin-bottom: 0; }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(var(--s-2)); }
+  to   { opacity: 1; transform: none; }
+}
+.headline {
+  display: flex; width: 100%; gap: var(--s-2); align-items: center;
+  padding: var(--s-2) var(--s-3);
+  background: none; border: none; box-shadow: none;
+  cursor: pointer; text-align: left;
+}
+.headline:active { transform: none; }
+.headline:hover { background: var(--ink); }
+.headline .line {
+  flex: 1; min-width: 0;
+  font-family: var(--font-sans);
+  font-size: var(--t-md);
+  color: var(--fg);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.headline .reply-to { font-family: var(--font-mono); font-size: var(--t-2xs); color: var(--bear); }
+.card .full { padding: 0 var(--s-3) var(--s-3); }
+.card.collapsed .full { display: none; }
+
+.card .meta {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: baseline;
+  padding-top: var(--s-1);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+}
+.state {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--state-color, var(--fg-dim));
+}
+/* square block, not a dot */
+.state::before {
+  content: ""; width: var(--dot); height: var(--dot);
+  background: currentColor;
+  box-shadow: var(--shadow-hard);
+}
+.kind { color: var(--fg-dim); }
+.id { font-family: var(--font-pixel); font-size: var(--t-2xs); color: var(--fg-dim); }
+.card .meta .id { margin-left: auto; }
+
+.card .claim {
+  margin: var(--s-2) 0 var(--s-3);
+  font-size: var(--t-lg);
+  font-weight: var(--w-medium);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--track-tight);
+  color: var(--fg);
+}
+.card .figures { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: flex-end; }
+.figure { display: flex; flex-direction: column; font-family: var(--font-mono); }
+.figure .k { font-size: var(--t-2xs); text-transform: uppercase; color: var(--fg-dim); }
+.figure .v { font-size: var(--t-base); font-weight: var(--w-semibold); color: var(--fg); }
+
+.replies {
+  font-family: var(--font-mono); font-size: var(--t-xs);
+  color: var(--bear);
+  background: none; border: none; box-shadow: none;
+  padding: 0; cursor: pointer; text-align: left;
+}
+.replies:hover { color: var(--fg); text-decoration: underline; }
+.replies:active { transform: none; }
+
+.card .source { margin-top: var(--s-3); font-size: var(--t-xs); word-break: break-all; }
+.card .source q { display: block; margin-top: var(--s-1); color: var(--fg-dim); font-style: italic; }
+.card details { margin-top: var(--s-3); }
+.card summary {
+  cursor: pointer; font-family: var(--font-mono); font-size: var(--t-xs);
+  text-transform: uppercase; color: var(--quant);
+}
+.card pre {
+  margin: var(--s-2) 0 0; padding: var(--s-2);
+  background: var(--ink);
+  border: var(--hairline) solid var(--line);
+  font-size: var(--t-xs); line-height: var(--lh-snug);
+  overflow-x: auto;
+}
+.card pre.result { color: var(--state-ok); }
+.card pre.result.failed { color: var(--bear); }
+.card .note {
+  margin-top: var(--s-3); padding-top: var(--s-2);
+  border-top: var(--hairline) dashed var(--line);
+  font-size: var(--t-xs); line-height: var(--lh-snug);
+  color: var(--fg-dim);
+}
+.card .note b { font-family: var(--font-mono); text-transform: uppercase; color: var(--fg-dim); }
+
+.card[data-state="pending"]       { --state-color: var(--fg-dim); }
+.card[data-state="verified"],
+.card[data-state="computed"]      { --state-color: var(--state-ok); }
+.card[data-state="unsourced"],
+.card[data-state="misclassified"] { --state-color: var(--state-warn); }
+.card[data-state="refuted"]       { --state-color: var(--state-dead); opacity: .55; }
+.card[data-state="refuted"] .claim,
+.card[data-state="refuted"] .headline .line {
+  text-decoration: line-through;
+  text-decoration-color: var(--state-dead);
+  color: var(--fg-dim);
+}
+.card.gap { border-left-style: dashed; }
+
+.card.hit { animation: hit-shake var(--dur-hit) var(--step-4); }
+.card.hit::after {
+  content: ""; position: absolute; inset: 0;
+  background: var(--state-color); pointer-events: none;
+  animation: hit-flash var(--dur-hit) var(--step-4) forwards;
+}
+@keyframes hit-shake {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(calc(var(--s-1) * -1)); }
+  50% { transform: translateX(var(--s-1)); }
+  75% { transform: translateX(calc(var(--s-1) * -0.5)); }
+}
+@keyframes hit-flash { from { opacity: .3; } to { opacity: 0; } }
+.card.confirmed { animation: confirm-blink var(--dur-slow) var(--step-4) 2; }
+@keyframes confirm-blink {
+  0%, 100% { border-top-color: var(--line); border-right-color: var(--line); border-bottom-color: var(--line); }
+  50% { border-top-color: var(--state-ok); border-right-color: var(--state-ok); border-bottom-color: var(--state-ok); }
+}
+.card.flash { animation: target-blink var(--dur-flash) var(--step-4) 2; }
+@keyframes target-blink {
+  0%, 100% { border-color: var(--line); border-left-color: var(--role); }
+  50% { border-color: var(--bear); }
+}
+
+/* judge commentary */
+.verdict-note {
+  margin-bottom: var(--s-2); padding: var(--s-2) var(--s-3);
+  background: var(--panel);
+  border: var(--rail) solid var(--line);
+  border-left: var(--rail-thick) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  animation: card-in var(--dur-card) var(--ease);
+}
+.verdict-note .head {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: baseline;
+  margin-bottom: var(--s-1);
+  font-family: var(--font-mono); font-size: var(--t-2xs);
+}
+.verdict-note .head .id { margin-left: auto; }
+.verdict-note .body { margin: 0; font-size: var(--t-base); line-height: var(--lh-snug); color: var(--fg); }
+.verdict-note .cost { margin: var(--s-1) 0 0; font-family: var(--font-mono); font-size: var(--t-2xs); color: var(--fg-dim); }
+.verdict-note[data-state="verified"],
+.verdict-note[data-state="computed"] { --state-color: var(--state-ok); }
+.verdict-note[data-state="unsourced"],
+.verdict-note[data-state="misclassified"] { --state-color: var(--state-warn); }
+.verdict-note[data-state="refuted"] { --state-color: var(--state-dead); }
+
+.logline {
+  margin: 0; padding: var(--s-1) 0 var(--s-2);
+  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-dim);
+}
+.logline.round {
+  margin-top: var(--s-1); padding-top: var(--s-2);
+  border-top: var(--hairline) solid var(--line);
+  font-family: var(--font-pixel); text-transform: uppercase; color: var(--judge);
+}
+
+/* ---------------- match overlays ---------------- */
+#intro {
+  position: fixed; inset: 0; z-index: 50; display: none;
+  place-content: center;
+  cursor: pointer;
+}
+#intro::before {                     /* blurred courtroom, like the record */
+  content: ""; position: fixed; inset: 0;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  filter: blur(var(--arena-blur));
+}
+#intro::after { content: ""; position: fixed; inset: 0; background: var(--intro-scrim); }
+#intro.show { display: grid; }
+
+#intro .card {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--intro-portrait) minmax(0, var(--sheet-max)) var(--intro-portrait);
+  gap: var(--s-5);
+  align-items: center; justify-content: center;
+  margin: 0; padding: 0;
+  background: none; border: none; box-shadow: none;
+}
+#intro .fighter-card { --role: var(--fg-dim); margin: 0; }
+#intro .fighter-card[data-agent="bull"] {
+  --role: var(--bull);
+  animation: rush-right var(--dur-slide) var(--step-6);
+}
+#intro .fighter-card[data-agent="bear"] {
+  --role: var(--bear);
+  animation: rush-left var(--dur-slide) var(--step-6);
+}
+@keyframes rush-right { from { transform: translateX(-100vw); } }
+@keyframes rush-left  { from { transform: translateX(100vw); } }
+#intro .frame {
+  display: block; width: 100%; aspect-ratio: 1;
+  background: var(--portrait-bg);
+  border: var(--rail) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+}
+#intro .frame img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  image-rendering: pixelated;
+  filter: var(--portrait-outline);   /* outline only - no brightness/saturate here */
+}
+#intro .frame { background: var(--portrait-bg); }
+#intro .fighter-card figcaption {
+  margin-top: var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--role);
+}
+#intro .fighter-card figcaption small { display: block; font-size: var(--t-2xs); color: var(--parchment-dim); }
+
+/* the judge presides above the card */
+#intro .presiding {
+  position: relative;
+  justify-self: center;
+  width: var(--intro-judge);
+  margin: 0 0 var(--s-4);
+  text-align: center;
+}
+#intro .presiding .frame { border-color: var(--judge); }
+#intro .presiding figcaption {
+  margin-top: var(--s-1);
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--judge);
+}
+
+#intro .sheet {
+  padding: var(--s-5);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail) solid var(--judge);
+  box-shadow: var(--shadow-hard);
+  color: var(--parchment);
+  text-align: center;
+}
+.product {
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--judge);
+}
+#verdict .product { font-size: var(--t-2xs); }
+#intro .ticker {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-4xl);
+  line-height: var(--lh-tight);
+  color: var(--parchment);
+}
+#intro .rounds {
+  margin: var(--s-2) 0 var(--s-4);
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);
+  text-transform: uppercase;
+  color: var(--judge);
+}
+#intro .versus {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--s-3);
+  align-items: baseline;
+  padding: var(--s-3) 0;
+  border-top: var(--hairline) solid var(--wood-line);
+  border-bottom: var(--hairline) solid var(--wood-line);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+}
+#intro .versus .bull { color: var(--bull); text-align: right; }
+#intro .versus .bear { color: var(--bear); text-align: left; }
+#intro .versus .vs { color: var(--parchment-dim); }
+#intro .pack { margin: var(--s-4) 0 0; text-align: left; }
+#intro .pack h3 {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+#intro .pack ul { margin: 0; padding: 0; list-style: none; }
+#intro .pack li {
+  display: flex; gap: var(--s-2);
+  padding: var(--s-1) 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--parchment);
+  border-bottom: var(--hairline) solid var(--wood-line);
+}
+#intro .pack li .type { color: var(--quant); text-transform: uppercase; }
+#intro .pack .empty { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--parchment-dim); }
+#intro .hint {
+  margin: var(--s-4) 0 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+
+/* ---------------- menu ---------------- */
+#menu {
+  position: fixed; inset: 0; z-index: 60; display: none;
+  place-content: center;
+  overflow: auto;
+  padding: var(--s-5) var(--s-4);
+}
+#menu.show { display: grid; }
+/* Both backdrop layers are pseudo-elements, i.e. the FIRST and LAST child of
+   #menu - so without explicit indices the scrim paints on top of the panel and
+   dims it along with the room. z-index nails the order: room, scrim, panel. */
+#menu::before {
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  filter: blur(var(--arena-blur));
+}
+#menu::after {
+  content: ""; position: fixed; inset: 0; z-index: 1;
+  background: var(--arena-scrim);
+}
+.menu-panel {
+  position: relative; z-index: 2;        /* above the scrim: full brightness */
+  width: min(100%, var(--menu-max));
+  margin: 0 auto;
+  padding: var(--s-6);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail-thick) solid var(--gold);
+  box-shadow: var(--shadow-hard);
+  color: var(--parchment);
+}
+.menu-title {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xl);
+  line-height: var(--lh-tight);
+  color: var(--parchment);
+}
+.menu-sub {
+  margin: var(--s-1) 0 var(--s-5);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+#menu .field { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-3); }
+#menu .field-label {
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+  min-width: 4.5rem;
+}
+#menu select, #menu input, #menu button {
+  background: var(--wood);
+  border: var(--rail) solid var(--wood-line);
+  color: var(--parchment);
+  font-size: var(--t-sm);
+  padding: var(--s-1) var(--s-2);
+}
+#menu .asset-panel { margin-bottom: var(--s-5); }
+#menu .toggle { gap: var(--s-2); }
+#menu .toggle input { width: auto; }
+
+.bet {
+  margin: 0 0 var(--s-5);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  border: var(--rail) solid var(--wood-line);
+}
+.bet legend {
+  padding: 0 var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.bet-sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-bottom: var(--s-4); }
+.bet-side {
+  --role: var(--parchment-dim);
+  padding: var(--s-3) var(--s-2) !important;
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--parchment-dim) !important;
+}
+.bet-side[data-bet="bull"] { --role: var(--bull); }
+.bet-side[data-bet="bear"] { --role: var(--bear); }
+/* The chosen side is unmistakable: its own colour on the border and the text,
+   plus a tinted ground - a border alone was too quiet to answer "did it land?". */
+.bet-side[aria-pressed="true"] {
+  border-color: var(--role) !important;
+  color: var(--role) !important;
+  box-shadow: inset 0 0 0 100vmax rgb(255 255 255 / 6%);
+}
+/* one row: WAGER [field] $CREDIT ............ SKIP BET */
+.bet-row { display: flex; align-items: center; gap: var(--s-3); }
+.bet-row .field { margin: 0; gap: var(--s-2); }
+.bet .unit {
+  display: block; margin-top: var(--s-1);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+  text-align: center;
+}
+.bet-col { display: flex; flex-direction: column; }
+.bet-col .bet-side { width: 100%; }
+/* the stake IS the click: three fixed amounts under each side */
+.amounts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-2); margin-top: var(--s-2); }
+.amount {
+  font-family: var(--font-mono);
+  font-size: var(--t-lg) !important;
+  font-variant-numeric: tabular-nums;
+  padding: var(--s-2) 0 !important;
+  color: var(--parchment-dim) !important;
+}
+.amount:hover { color: var(--parchment) !important; }
+.amount[aria-pressed="true"] {
+  background: var(--gold) !important;
+  border-color: var(--wood-line) !important;
+  color: var(--wood-line) !important;
+}
+.bet-summary {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--bet-colour, var(--parchment-dim));
+}
+#bet-skip {
+  margin-left: auto;                    /* pinned to the right edge of the row */
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+}
+#bet-skip[aria-pressed="true"] { border-color: var(--gold) !important; color: var(--gold) !important; }
+.fine {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--parchment-dim);
+}
+/* The loudest thing on the screen: everything else in the menu is dark wood,
+   this is the only filled surface. */
+#menu .big {
+  display: block; width: 100%;
+  margin-bottom: var(--s-5);
+  padding: var(--s-4);
+  font-family: var(--font-pixel);
+  font-size: var(--t-cta) !important;
+  font-weight: 700;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  background: var(--gold) !important;
+  color: var(--wood-line) !important;
+  border: var(--rail) solid var(--wood-line) !important;
+  box-shadow: var(--shadow-hard);
+}
+#menu .big:hover { background: var(--gold-bright) !important; }
+#menu .big:active { transform: translate(var(--press), var(--press)); box-shadow: none; }
+.replay-block {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: var(--hairline) solid var(--wood-line);
+}
+.replay-block > div { flex: 1 1 auto; }
+.replay-block .field-label { display: block; margin-bottom: var(--s-2); }
+#menu-close {
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--parchment-dim) !important;
+}
+#menu-close:hover { color: var(--parchment) !important; border-color: var(--parchment-dim) !important; }
+#menu-close[hidden] { display: none; }
+/* while a case is running the same button throws it away - say so in red */
+#menu .big.abandon {
+  background: var(--bear) !important;
+  color: var(--wood-line) !important;
+}
+#menu .big.abandon:hover { background: var(--parchment) !important; }
+
+/* ---------------- adding to the bet while the case runs ---------------- */
+.hud-bet {
+  display: flex; align-items: center; justify-content: center; gap: var(--s-3);
+  margin-top: var(--s-2);
+  flex-wrap: wrap;
+}
+.hud-bet .tickets {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+.hud-bet .tickets[hidden] { display: none; }
+#objection {
+  font-family: var(--font-pixel);
+  font-size: var(--t-cta);
+  text-transform: uppercase;
+  letter-spacing: var(--track-wide);
+  background: var(--gold);
+  border: var(--rail) solid var(--wood-line);
+  color: var(--wood-line);
+  padding: var(--s-2) var(--s-4);
+  box-shadow: var(--shadow-hard);
+}
+#objection:hover { background: var(--gold-bright); }
+#objection:active { transform: translate(var(--press), var(--press)); box-shadow: none; }
+.gallery-form { display: flex; align-items: center; gap: var(--s-2); }
+.gallery-form[hidden] { display: none; }
+.gallery-form input {
+  width: 26rem; max-width: 70vw;
+  padding: var(--s-2);
+  background: var(--wood);
+  border: var(--rail) solid var(--wood-line);
+  color: var(--parchment);
+  font-family: var(--font-sans);
+  font-size: var(--t-base);
+}
+.gallery-form button {
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  background: var(--wood);
+  border: var(--rail) solid var(--gold);
+  color: var(--gold);
+  padding: var(--s-2) var(--s-3);
+}
+#gallery-note {
+  margin: 0;
+  max-width: 26rem;
+  text-align: center;
+}
+#gallery-note:empty { display: none; }
+
+/* The stake row sits under the name plate, never in the speech area: bubbles
+   are for reading, controls have their own place. */
+.side-bets {
+  position: absolute; inset: 0; z-index: 5;
+  pointer-events: none;                 /* only the buttons take clicks */
+}
+.side-bets[hidden] { display: none; }
+.side-bet {
+  position: absolute;                   /* left/top written by placeSideBets */
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-1);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+.side-bet[data-side-bet="bull"] { --role: var(--bull); }
+.side-bet[data-side-bet="bear"] { --role: var(--bear); }
+.side-bet .odds {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--role);
+  text-shadow: var(--hit-outline);
+}
+/* identical width, identical height - a row of three, not three sizes */
+.side-bet .amounts {
+  display: grid; grid-template-columns: repeat(3, var(--amount-w));
+  gap: var(--s-1); margin: 0;
+}
+/* Dark wood, role-coloured text: the controls belong to the room rather than
+   sitting on top of it. */
+.side-bet .amount {
+  width: 100%;
+  padding: var(--s-1) 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--role);
+  color: var(--role);
+  box-shadow: var(--shadow-hard);
+}
+.side-bet .amount:hover { background: var(--wood-lift); }
+.side-bet .amount:active { transform: translate(var(--press), var(--press)); box-shadow: none; }
+.side-bet .amount[disabled] { opacity: 0.35; }
+/* short confirmation flash: the click landed and the ticket exists */
+.side-bet .amount.taken { animation: amount-taken 320ms var(--step-4); }
+@keyframes amount-taken {
+  0%, 100% { background: var(--wood-panel); color: var(--role); }
+  50% { background: var(--role); color: var(--ink); }
+}
+
+/* the question, held over the stage while the court answers it */
+.gallery-bar {
+  position: relative; z-index: 5;
+  width: min(100%, var(--gallery-max));
+  margin: var(--s-2) auto 0;
+  padding: var(--s-2) var(--s-3);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-left: var(--rail-thick) solid var(--bear);
+  box-shadow: var(--shadow-hard);
+  display: flex; align-items: baseline; gap: var(--s-3);
+}
+.gallery-bar[hidden] { display: none; }
+.gallery-bar .who {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--bear);
+  white-space: nowrap;
+}
+.gallery-bar .text {
+  font-family: var(--font-sans);
+  font-size: var(--t-md);
+  color: var(--parchment);
+}
+
+/* the confirmation pop-up */
+#toast {
+  position: fixed; top: var(--toast-top); left: 50%; z-index: 58;
+  width: min(90vw, var(--toast-max));
+  padding: var(--s-3) var(--s-4);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail-thick) solid var(--gold);
+  box-shadow: var(--shadow-hard);
+  text-align: center;
+  pointer-events: none;                 /* never blocks the arena underneath */
+  opacity: 0;
+  transform: translate(-50%, 0);         /* drifts up to -rise as it fades in */
+  transition: opacity var(--dur-toast) var(--step-4), transform var(--dur-toast) var(--step-4);
+}
+#toast.show { opacity: 1; transform: translate(-50%, calc(var(--toast-rise) * -1)); }
+#toast .line {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+#toast .sub {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment);
+}
+#toast .sub[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  #toast { transition: none; }
+}
+
+/* the full-screen interstitial: 1.5s, then the court answers */
+#objection-card {
+  position: fixed; inset: 0; z-index: 48;
+  display: grid; place-content: center; justify-items: center;
+  background: var(--arena-scrim);
+  text-align: center;
+}
+#objection-card[hidden] { display: none; }
+#objection-card .line {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-4xl);
+  line-height: var(--lh-tight);
+  color: var(--bear);
+  text-shadow: var(--shadow-hard);
+}
+#objection-card .sub {
+  margin: var(--s-3) 0 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-xl);
+  text-transform: uppercase;
+  color: var(--parchment);
+}
+
+/* questions to the court on the verdict sheet */
+.ask-form { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); }
+.ask-form input {
+  flex: 1 1 auto;
+  padding: var(--s-2);
+  background: var(--wood);
+  border: var(--rail) solid var(--wood-line);
+  color: var(--parchment);
+  font-family: var(--font-sans);
+  font-size: var(--t-base);
+}
+.ask-form button {
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  background: var(--gold);
+  border: var(--rail) solid var(--wood-line);
+  color: var(--wood-line);
+  padding: var(--s-2) var(--s-3);
+  box-shadow: var(--shadow-hard);
+}
+.ask-form button:hover { background: var(--gold-bright); }
+.qa { display: grid; gap: var(--s-3); margin-bottom: var(--s-5); }
+.qa .pair {
+  padding: var(--s-3);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-left: var(--rail-thick) solid var(--judge);
+}
+.qa .q {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+.qa .a {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--t-base);
+  line-height: var(--lh-snug);
+  color: var(--parchment);
+}
+/* waiting for the court: the question is already on the list, the answer is not */
+.qa .pair.pending { border-left-color: var(--judge); }
+.qa .a.waiting {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--judge);
+}
+.qa .a.waiting::after {
+  content: "\258C ";
+  margin-left: var(--hairline);
+  animation: blink 1s var(--step-4) infinite;
+}
+.qa .a.failed { color: var(--bear); font-family: var(--font-pixel); font-size: var(--t-2xs); text-transform: uppercase; }
+
+/* an answer the court gave from memory rather than from the record */
+.qa .pair.outside { border-left-color: var(--state-warn); }
+.qa .pair.outside .mark {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--state-warn);
+}
+
+/* the settled tickets on the verdict sheet */
+#v-bet-rows {
+  margin: 0 0 var(--s-4);
+  display: grid; gap: var(--s-1);
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--parchment-dim);
+}
+#v-bet-rows[hidden] { display: none; }
+#v-bet-rows .row { display: flex; justify-content: center; gap: var(--s-2); }
+#v-bet-rows .won { color: var(--state-ok); }
+#v-bet-rows .lost { color: var(--bear); }
+
+/* bet chip in the top bar */
+.bet-chip {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--bet-colour, var(--parchment-dim));
+}
+.bet-chip[hidden] { display: none; }
+
+#court-banner {
+  position: fixed; inset: 0; z-index: 46;
+  display: grid; place-content: center;
+  background: var(--arena-scrim);
+  pointer-events: none;
+}
+#court-banner[hidden] { display: none; }
+#court-banner p {
+  margin: 0;
+  padding: var(--s-4) var(--s-6);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail) solid var(--judge);
+  box-shadow: var(--shadow-hard);
+  font-family: var(--font-pixel);
+  font-size: var(--t-xl);
+  text-transform: uppercase;
+  color: var(--parchment);
+}
+#court-banner .cursor::after {
+  content: "\258C ";
+  color: var(--judge);
+  animation: blink 1s var(--step-4) infinite;
+}
+
+#round-card {
+  position: fixed; inset: 0; z-index: 45; display: none;
+  place-content: center; text-align: center;
+  pointer-events: none;
+}
+#round-card::before {                /* the same blurred courtroom as the record */
+  content: ""; position: fixed; inset: 0;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  filter: blur(var(--arena-blur));
+}
+#round-card::after { content: ""; position: fixed; inset: 0; background: var(--arena-scrim); }
+#round-card.show { display: grid; animation: round-flash var(--dur-round) var(--step-8) forwards; }
+#round-card .panel {
+  position: relative;
+  padding: var(--s-5) var(--s-7);
+  background: var(--wood-panel);
+  border: var(--rail) solid var(--wood-line);
+  border-top: var(--rail) solid var(--judge);
+  box-shadow: var(--shadow-hard);
+}
+#round-card .big {
+  font-family: var(--font-pixel);
+  font-size: var(--t-3xl);
+  text-transform: uppercase;
+  color: var(--parchment);
+}
+#round-card .sub {
+  margin-top: var(--s-3);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--judge);
+}
+@keyframes round-flash { 0% { opacity: 0; } 20%, 70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------------- verdict ---------------- */
+#verdict {
+  /* same wooden skin as the record below the stage */
+  --panel: var(--wood-panel);
+  --line: var(--wood-line);
+  --fg: var(--parchment);
+  --fg-dim: var(--parchment-dim);
+  position: fixed; inset: 0; z-index: 40; display: none;
+  padding: var(--s-6) var(--s-4);
+  background: var(--wood);
+  overflow: auto;
+}
+#verdict::before {
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: url("assets/courtroom-v1.png") center var(--stage-focus) / cover no-repeat;
+  filter: blur(var(--arena-blur));
+  pointer-events: none;
+}
+#verdict::after {
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: var(--arena-scrim);
+  pointer-events: none;
+}
+#verdict.show { display: block; animation: card-in var(--dur-slow) var(--ease); }
+
+/* fighters flank the sheet: winner and loser portraits */
+#verdict .ring {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: var(--verdict-portrait) minmax(0, var(--sheet-max)) var(--verdict-portrait);
+  gap: var(--s-5);
+  justify-content: center; align-items: center;   /* centred against the sheet */
+  margin: 0 auto;
+}
+#verdict .corner {
+  --role: var(--fg-dim);
+  margin: 0; align-self: center;   /* against the sheet, not its top edge */
+  text-align: center;
+}
+#verdict .corner[data-agent="bull"] { --role: var(--bull); }
+#verdict .corner[data-agent="bear"] { --role: var(--bear); }
+#verdict .corner .frame {
+  display: block; width: 100%; aspect-ratio: 1;
+  background: var(--portrait-bg);
+  border: var(--rail) solid var(--role);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+}
+#verdict .corner img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  image-rendering: pixelated;
+  filter: var(--portrait-outline);
+}
+#verdict .corner figcaption {
+  margin-top: var(--s-3);
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);          /* two steps up */
+  text-transform: uppercase;
+  color: var(--role);
+}
+#verdict .corner .tally {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-2xl);         /* ~32px balance */
+}
+
+#verdict .sheet {
+  padding: var(--s-5);
+  background: var(--panel);
+  border: var(--rail) solid var(--line);
+  border-top: var(--rail) solid var(--judge);
+  box-shadow: var(--shadow-hard);
+}
+
+/* the scoreline is the first thing on screen */
+#verdict .scoreline { margin-bottom: var(--s-5); }
+#verdict .bet-result {
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-pixel);
+  font-size: var(--t-bet);
+  line-height: var(--lh-tight);
+  color: var(--bet-colour, var(--parchment-dim));
+  text-shadow: var(--shadow-hard);
+}
+#verdict .bet-result[hidden] { display: none; }
+#verdict .bet-result.push, #verdict .bet-result.none { font-size: var(--t-lg); }
+#verdict .winner {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-3xl);
+  line-height: var(--lh-tight);
+  color: var(--winner-colour, var(--fg));
+  text-shadow: var(--shadow-hard);
+}
+#verdict .lean {
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xl);        /* the takeaway line, read from the back row */
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--lean-colour, var(--fg-dim));
+}
+#verdict .margin-note {
+  margin: var(--s-2) 0 var(--s-2);
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+#verdict .standings { display: grid; gap: var(--s-3); }
+#verdict .standing { --role: var(--fg-dim); display: grid; gap: var(--s-1); }
+#verdict .standing[data-agent="bull"] { --role: var(--bull); }
+#verdict .standing[data-agent="bear"] { --role: var(--bear); }
+#verdict .standing[data-agent="quant"] { --role: var(--quant); }
+#verdict .standing .row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-pixel);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  color: var(--role);
+}
+#verdict .standing .row .num { font-size: var(--t-lg); }
+#verdict .standing .bar { margin: 0; }
+#verdict .aside {
+  margin: var(--s-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--fg-dim);
+}
+#verdict .thesis {
+  margin: var(--s-2) 0 var(--s-5);
+  font-size: var(--t-xl); font-weight: var(--w-medium);
+  line-height: var(--lh-tight); color: var(--fg);
+}
+#verdict .readout { display: flex; align-items: baseline; gap: var(--s-3); }
+#verdict .readout .num { font-family: var(--font-pixel); font-size: var(--t-2xl); color: var(--judge); }
+#verdict .readout .unit { font-family: var(--font-mono); font-size: var(--t-2xs); text-transform: uppercase; color: var(--fg-dim); }
+#verdict .track { display: flex; gap: var(--seg-gap); height: var(--seg-h-sm); margin: var(--s-2) 0 var(--s-5); }
+#verdict .track .seg { --role: var(--judge); }
+#verdict ul { margin: var(--s-3) 0 var(--s-5); padding-left: var(--s-5); }
+#verdict li {
+  margin-bottom: var(--s-4);      /* room to breathe between falsifiers */
+  font-size: var(--t-lg);         /* two steps up */
+  line-height: var(--lh-loose);
+}
+#verdict .evidence { margin: var(--s-2) 0 var(--s-5); }
+#verdict .evidence .card { --role: var(--state-ok); }
+#verdict .evidence:empty::after {
+  content: "No claim survived verification";
+  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-dim);
+}
+#verdict .balances { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-2); margin: var(--s-2) 0 var(--s-5); }
+#verdict .balances div {
+  padding: var(--s-2) var(--s-3);
+  border: var(--hairline) solid var(--line);
+  border-left: var(--rail) solid var(--role);
+}
+#verdict .balances .num { display: block; font-family: var(--font-pixel); font-size: var(--t-lg); color: var(--role); }
+#verdict .disclaimer {
+  padding-top: var(--s-3);
+  border-top: var(--hairline) solid var(--line);
+  font-size: var(--t-xs); line-height: var(--lh-loose); color: var(--fg-dim);
+}
+#verdict .dismiss { margin-top: var(--s-4); }
+
+/* Custom properties are not allowed in media queries, so these breakpoints are
+   the only literal lengths in the sheet. */
+@media (max-width: 75rem) {
+  #asset-card { position: static; width: auto; margin: var(--s-3) var(--page-x) 0; }
+}
+@media (max-width: 56.25rem) {          /* ~900px: frames only, no courtroom art */
+  #top { min-height: 0; background-image: none; }
+  #top::before, #top::after { display: none; }
+  #stage { padding: var(--s-3) 0; border-bottom: var(--hairline) solid var(--line); }
+  #stage .actors {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3);
+    padding: 0 var(--page-x);
+  }
+  .actor,
+  .actor[data-agent="bull"], .actor[data-agent="bear"], .actor[data-agent="judge"] {
+    position: static; width: auto; bottom: auto; left: auto; transform: none;
+  }
+  .actor[data-agent="judge"] { order: -1; }
+  .actor.speaking { transform: translateY(calc(var(--actor-lift) * -1)); }
+  .bubble { position: static; transform: none; max-width: none; margin-bottom: var(--s-2); }
+  .bubble::before, .bubble::after { display: none; }
+  .stage-footer { position: static; transform: none; margin: var(--s-3) auto 0; }
+}
+@media (max-width: 64rem) {
+  #board { grid-template-columns: var(--col-fighter) var(--col-fighter); }
+  .col[data-agent="judge"] { grid-column: span 2; }
+}
+@media (max-width: 64rem) {
+  /* no room for the flanking portraits: fold them above the sheet */
+  #verdict .ring { grid-template-columns: minmax(0, var(--sheet-max)); }
+  #verdict .corner {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--s-3); align-items: center;
+    text-align: left;
+  }
+  #verdict .corner .frame { width: var(--witness-col); }
+  #verdict .corner[data-agent="bear"] { order: 1; }
+}
+@media (max-width: 40rem) {
+  #board, #verdict .balances, .hud-row { grid-template-columns: 1fr; }
+  .col[data-agent="judge"] { grid-column: auto; }
+  .fighter[data-agent="bull"] { text-align: left; }
+  .fighter[data-agent="bull"] .name { justify-content: flex-start; }
+  #intro .card { grid-template-columns: minmax(0, var(--sheet-max)); }
+  #intro .fighter-card { display: none; }      /* no room: the panel is the point */
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <div id="controls">
+    <span class="brand">Financial Court</span>
+    <span class="tagline">4 models · 3 providers · one Orbio key</span>
+    <span class="bet-chip" id="bet-chip" hidden></span>
+    <button id="sound" aria-pressed="false" title="Sound off">♪</button>
+    <button id="to-menu">Menu</button>
+    <span id="status">Ready</span>
+  </div>
+
+  <header id="hud">
+    <div class="hud-row">
+      <div class="fighter" data-agent="bull">
+        <div class="name">
+          <span data-name="bull">Bull</span>
+          <span class="num" data-num="bull">100</span>
+          <span class="unit">credits</span>
+          <span class="at-stake" data-at-stake="bull" hidden></span>
+        </div>
+        <p class="model" data-model="bull"></p>
+      </div>
+
+      <div class="round-box">
+        <div class="label">round</div>
+        <div class="count"><span data-round>—</span><small> / <span data-rounds>—</span></small></div>
+      </div>
+
+      <div class="fighter" data-agent="bear">
+        <div class="name">
+          <span data-name="bear">Bear</span>
+          <span class="num" data-num="bear">100</span>
+          <span class="unit">credits</span>
+          <span class="at-stake" data-at-stake="bear" hidden></span>
+        </div>
+        <p class="model" data-model="bear"></p>
+      </div>
+
+    </div>
+
+    <div class="rope" aria-hidden="true">
+      <div class="rope-fill" data-rope></div>
+      <div class="rope-stake" data-stake="bull" hidden></div>
+      <div class="rope-stake" data-stake="bear" hidden></div>
+    </div>
+
+    <div class="hud-bet">
+      <span class="tickets" id="bet-tickets" hidden></span>
+    </div>
+  </header>
+
+  <div class="mask" aria-hidden="true"></div>
+
+  <!-- Directly under each fighter's name plate. Outside #stage on purpose:
+       inside it the podium mask would cover the row. Positioned by measuring
+       the caption (see placeSideBets), because the portraits are anchored in
+       rem tokens and the buttons must follow them, not guess at them. -->
+  <div class="side-bets" id="side-bets" hidden>
+    <div class="side-bet" data-side-bet="bull">
+      <p class="odds">@ <span data-odds="bull">—</span></p>
+      <div class="amounts" data-add-amounts="bull"></div>
+    </div>
+    <div class="side-bet" data-side-bet="bear">
+      <p class="odds">@ <span data-odds="bear">—</span></p>
+      <div class="amounts" data-add-amounts="bear"></div>
+    </div>
+  </div>
+
+  <p class="gallery-bar" id="gallery-bar" hidden>
+    <span class="who">objection</span>
+    <span class="text" id="gallery-question"></span>
+  </p>
+
+  <p id="turn">
+    <span class="who">court in session…</span>
+    <span class="meta"><span data-claim-progress></span><span data-since></span></span>
+  </p>
+
+  <section id="stage" aria-label="Courtroom">
+
+    <div class="actors">
+      <figure class="actor" data-agent="bull">
+        <div class="bubbles" data-bubbles="bull" data-count="0"></div>
+        <span class="frame"><img src="assets/bull.png" alt="Bull agent portrait"></span>
+        <figcaption class="caption"><span data-name="bull"></span><small data-actor-model="bull"></small></figcaption>
+      </figure>
+      <figure class="actor" data-agent="judge">
+        <div class="bubbles" data-bubbles="judge" data-count="0"></div>
+        <span class="frame"><img src="assets/judge.png" alt="Judge portrait"></span>
+        <figcaption class="caption"><span data-name="judge"></span><small data-actor-model="judge"></small></figcaption>
+      </figure>
+      <figure class="actor" data-agent="bear">
+        <div class="bubbles" data-bubbles="bear" data-count="0"></div>
+        <span class="frame"><img src="assets/bear.png" alt="Bear agent portrait"></span>
+        <figcaption class="caption"><span data-name="bear"></span><small data-actor-model="bear"></small></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- the footer and the reference card live on #top, not inside #stage: #stage
+       is painted under the podium mask, so anything in it would be covered -->
+  <aside id="asset-card" class="asset-panel"></aside>
+
+  <div class="stage-footer">
+    <!-- The loudest control on the stage, and the only one the audience needs. -->
+    <button type="button" id="objection" aria-expanded="false">objection!</button>
+    <form class="gallery-form" id="gallery-form" hidden>
+      <input id="gallery-input" maxlength="200" autocomplete="off"
+             placeholder="one question, 200 characters" aria-label="Question from the gallery">
+      <button type="submit" id="gallery-send">send</button>
+    </form>
+    <p class="fine" id="gallery-note"></p>
+
+    <button type="button" class="record-cue" id="record-cue">
+      debate record ↓ <span data-claim-count>0</span> claims
+    </button>
+  </div>
+</div>
+
+<main id="arena">
+  <div class="record-head">
+    <span class="record-title">Debate record</span>
+    <span class="record-hint">every claim is one line — click to open the full card</span>
+  </div>
+
+  <section id="board">
+    <div class="col" data-agent="bull">
+      <h2><span data-name="bull"></span> — positive thesis</h2>
+      <div class="feed"></div>
+    </div>
+    <div class="col" data-agent="judge">
+      <h2><span data-name="judge"></span> — rulings</h2>
+      <div class="feed"></div>
+    </div>
+    <div class="col" data-agent="bear">
+      <h2><span data-name="bear"></span> — negative thesis</h2>
+      <div class="feed"></div>
+    </div>
+  </section>
+
+  <section class="col" id="witness" data-agent="quant">
+    <h2><span data-name="quant"></span> — computations</h2>
+    <div class="feed"></div>
+  </section>
+</main>
+
+<div id="intro" aria-hidden="true">
+  <div class="card">
+    <figure class="fighter-card" data-agent="bull">
+      <span class="frame"><img src="assets/bull.png" alt=""></span>
+      <figcaption><span data-name="bull"></span><small id="intro-bull-model"></small></figcaption>
+    </figure>
+
+    <div>
+      <figure class="presiding">
+        <span class="frame"><img src="assets/judge.png" alt=""></span>
+        <figcaption><span data-name="judge"></span></figcaption>
+      </figure>
+
+      <div class="sheet">
+        <p class="product">Financial Court</p>
+        <aside id="intro-asset-card" class="asset-panel"></aside>
+        <p class="ticker" id="intro-asset"></p>
+        <p class="rounds" id="intro-rounds"></p>
+        <div class="versus">
+          <span class="bull" id="intro-bull-name"></span>
+          <span class="vs">vs</span>
+          <span class="bear" id="intro-bear-name"></span>
+        </div>
+        <div class="pack">
+          <h3>Evidence on the record</h3>
+          <ul id="intro-pack"></ul>
+          <p class="empty" id="intro-pack-empty">waiting for the source pack…</p>
+        </div>
+        <p class="hint">click to skip</p>
+      </div>
+    </div>
+
+    <figure class="fighter-card" data-agent="bear">
+      <span class="frame"><img src="assets/bear.png" alt=""></span>
+      <figcaption><span data-name="bear"></span><small id="intro-bear-model"></small></figcaption>
+    </figure>
+  </div>
+</div>
+
+<div id="menu" class="show">
+  <div class="menu-panel">
+    <p class="menu-title">Financial Court</p>
+    <p class="menu-sub">four models argue, one rules, you take a side</p>
+
+    <label class="field">
+      <span class="field-label">case</span>
+      <select id="asset-pick" aria-label="Asset"></select>
+    </label>
+    <input id="asset" value="NVDA" size="8" aria-label="Custom ticker" hidden>
+    <select id="kind" aria-label="Asset kind" hidden>
+      <option value="equity">equity</option>
+      <option value="token">token</option>
+    </select>
+
+    <aside id="menu-asset-card" class="asset-panel"></aside>
+
+    <label class="field">
+      <span class="field-label">rounds</span>
+      <select id="rounds" aria-label="Rounds">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+      </select>
+    </label>
+
+    <fieldset class="bet">
+      <legend>place your bet</legend>
+      <div class="bet-sides">
+        <div class="bet-col">
+          <button type="button" class="bet-side" data-bet="bull" aria-pressed="false">
+            <span data-name="bull"></span>
+          </button>
+          <div class="amounts" data-amounts="bull"></div>
+          <span class="unit">$credit</span>
+        </div>
+        <div class="bet-col">
+          <button type="button" class="bet-side" data-bet="bear" aria-pressed="false">
+            <span data-name="bear"></span>
+          </button>
+          <div class="amounts" data-amounts="bear"></div>
+          <span class="unit">$credit</span>
+        </div>
+      </div>
+      <div class="bet-row">
+        <p class="bet-summary" id="bet-summary">no bet placed</p>
+        <button type="button" id="bet-skip" aria-pressed="true">skip bet</button>
+      </div>
+      <p class="fine">simulated wager · no on-chain settlement</p>
+    </fieldset>
+
+    <label class="field toggle">
+      <input id="menu-sound" type="checkbox" checked>
+      <span class="field-label">courtroom audio</span>
+    </label>
+
+    <button type="button" id="open-court" class="primary big">Start the case</button>
+
+    <div class="replay-block">
+      <p class="field-label">replay a past case</p>
+      <div class="bet-row">
+        <select id="replays" aria-label="Saved runs"><option value="">saved cases…</option></select>
+        <button type="button" id="play">Replay</button>
+      </div>
+      <button type="button" id="menu-close" hidden>✕ close</button>
+    </div>
+  </div>
+</div>
+
+<!-- One pop-up for every confirmation, queued so two never overlap. It never
+     takes clicks: it is a receipt, not a dialog. -->
+<div id="toast" aria-live="polite">
+  <p class="line"></p>
+  <p class="sub" hidden></p>
+</div>
+
+<div id="objection-card" hidden>
+  <p class="line">objection</p>
+  <p class="sub">from the gallery</p>
+</div>
+
+<div id="court-banner" hidden>
+  <p>the court has reached a verdict<span class="cursor"></span></p>
+</div>
+
+<div id="round-card" aria-hidden="true">
+  <div class="panel">
+    <div class="big" id="round-big"></div>
+    <div class="sub" id="round-sub"></div>
+  </div>
+</div>
+
+<div id="verdict" role="dialog" aria-modal="true" aria-labelledby="v-title">
+  <div class="ring">
+    <figure class="corner" data-agent="bull">
+      <span class="frame"><img id="v-bull-img" src="assets/bull.png" alt=""></span>
+      <figcaption><span data-name="bull"></span><span class="tally" id="v-bull-tally"></span></figcaption>
+    </figure>
+
+    <div class="sheet">
+      <div class="scoreline">
+        <p class="product">Financial Court</p>
+        <p class="bet-result" id="v-bet" hidden></p>
+        <div id="v-bet-rows" hidden></div>
+        <p class="eyebrow" id="v-title">Result</p>
+        <p class="winner" id="v-winner"></p>
+        <p class="margin-note" id="v-margin"></p>
+      <p class="lean" id="v-lean"></p>
+        <div class="standings" id="v-standings"></div>
+      </div>
+
+      <p class="eyebrow">Thesis</p>
+      <p class="thesis" id="v-thesis"></p>
+
+      <p class="eyebrow">Confidence level</p>
+      <div class="readout">
+        <span class="num" id="v-conf">0.00</span>
+        <span class="unit">after credit settlement</span>
+      </div>
+      <div class="track" id="v-track"></div>
+
+      <p class="eyebrow">Falsifiers — what would force abandoning this thesis</p>
+      <ul id="v-falsifiers"></ul>
+
+      <p class="eyebrow">Evidence — the claims this thesis stands on</p>
+      <div class="evidence" id="v-evidence"></div>
+
+      <p class="eyebrow">Closing credit balances</p>
+      <div class="balances" id="v-balances"></div>
+
+      <p class="eyebrow">Ask the Market Wizard</p>
+      <form class="ask-form" id="v-ask">
+        <input id="v-ask-input" maxlength="200" autocomplete="off"
+               placeholder="one question, 200 characters" aria-label="Question for the court">
+        <button type="submit">ask</button>
+      </form>
+      <div class="qa" id="v-qa"></div>
+
+      <p class="disclaimer">Not a buy or sell recommendation. This is a thesis with an explicit
+        confidence level and the conditions that would invalidate it.</p>
+      <button class="dismiss" id="v-dismiss">Back to the board</button>
+    </div>
+
+    <figure class="corner" data-agent="bear">
+      <span class="frame"><img id="v-bear-img" src="assets/bear.png" alt=""></span>
+      <figcaption><span data-name="bear"></span><span class="tally" id="v-bear-tally"></span></figcaption>
+    </figure>
+  </div>
+</div>
+
+<script>
+const AGENTS = ["bull", "quant", "bear"];
+const ACTORS = ["bull", "judge", "bear"];
+const CREDITS_MAX = 100;
+const SEGMENTS = 20;                 /* mirrors --seg-count */
+/* The bar reads 60..130 credits, not 0..200: inside that window one ruling moves
+   several blocks, which is the whole point of a health bar. The printed number
+   next to it is always the real balance. */
+const BAR_MIN = 60;                  /* mirrors --bar-min */
+const BAR_MAX = 130;                 /* mirrors --bar-max */
+const BUBBLE_CHARS = 160;            /* one sentence, hard cap */
+const BUBBLE_STACK = 3;              /* mirrors --bubble-stack */
+const DRAW_MARGIN = 3;               /* under this gap the match is a draw */
+const TYPE_CPS = 55;                 /* characters per second */
+
+/* Model labels mirror BULL_MODEL / BEAR_MODEL / QUANT_MODEL / JUDGE_MODEL in
+   backend/config.py. Update both together when the roster changes. */
+const MODEL_LABEL = {
+  bull: "Gemini 3.1 Pro",
+  bear: "GPT-5.5",
+  quant: "GPT-5.3 Codex",
+  judge: "Claude Fable 5",
+};
+
+/* Ring names. AGENT_NAME is what the audience reads; the event contract still
+   uses the plain keys bull / bear / quant / judge. */
+const AGENT_NAME = {
+  bull: "Delusional Bull",
+  bear: "Permabear",
+  judge: "Market Wizard",
+  quant: "Expert Witness",
+};
+const TURN_VERB = {
+  bull: "is thinking…", bear: "is thinking…",
+  quant: "is computing…", judge: "is deciding…",
+};
+const TURN_ORDER = ["bull", "bear", "quant", "judge"];
+
+/* Reference data for the picker and the asset panel. Loaded from /assets, which
+   serves data/assets.json - hand-maintained, NOT part of the event stream and NOT
+   evidence. Missing file or missing fields both degrade to em dashes. */
+let ASSETS = {};
+
+const STATE_LABEL = {
+  pending: "pending", verified: "verified", computed: "computed",
+  unsourced: "unsourced", misclassified: "misclassified", refuted: "refuted",
+};
+const TYPE_LABEL = {
+  factual: "fact", interpretive: "interpretation",
+  quantitative: "computation", information_gap: "information gap",
+};
+const LOSS_STATES = new Set(["refuted", "unsourced", "misclassified"]);
+const WIN_STATES = new Set(["verified", "computed"]);
+
+/* The saved run is what gets demoed, so the fight card plays for replays too. */
+const INTRO_ON_REPLAY = true;
+
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const INTRO_MS = reducedMotion ? 0 : 4000;    /* on screen for 4s, or until a click */
+const INTRO_WAIT_MS = 6000;                  /* hard cap while waiting for sources */
+const ROUND_MS = reducedMotion ? 0 : 1200;
+const FLASH_MS = 2400;
+const HIT_MS = 1400;
+const HIT_NUM_MS = 1200;             /* mirrors --dur-hitnum */
+const CAM_MS = 200;                  /* mirrors --dur-cam */
+const SPEAK_MS = 2500;
+const SCROLL = reducedMotion ? "auto" : "smooth";
+
+/* Sound is off until the viewer asks for it: playback only ever starts from the
+   toggle's click handler, never on load. State lives here - no storage. A missing
+   or unplayable file is not an error: the toggle falls back to off, silently. */
+const SOUND = { on: false, ambient: null, drums: null, gavel: null };
+const VOL_AMBIENT = 0.15;            /* mirrors --vol-ambient */
+const VOL_AMBIENT_DUCKED = 0.05;     /* mirrors --vol-ambient-ducked */
+const VOL_DRUMS = 0.5;               /* mirrors --vol-drums */
+const VOL_GAVEL = 0.45;              /* mirrors --vol-gavel */
+const DRUMROLL_MS = 3000;            /* the drums peak here: the verdict lands on it */
+
+function makeAudio(src, { loop = false, volume = 1 } = {}) {
+  const audio = new Audio(src);
+  audio.loop = loop;
+  audio.volume = volume;
+  audio.preload = "auto";
+  audio.addEventListener("error", () => {}, { once: true });
+  return audio;
+}
+function paintSoundButton() {
+  const button = document.getElementById("sound");
+  button.setAttribute("aria-pressed", String(SOUND.on));
+  button.title = SOUND.on ? "Sound on" : "Sound off";
+}
+async function setSound(on) {
+  if (!on) {
+    SOUND.on = false;
+    SOUND.ambient?.pause();
+    paintSoundButton();
+    return;
+  }
+  SOUND.ambient ??= makeAudio("assets/audio/ambient.mp3", { loop: true, volume: VOL_AMBIENT });
+  SOUND.drums ??= makeAudio("assets/audio/drums.mp3", { volume: VOL_DRUMS });
+  SOUND.gavel ??= makeAudio("assets/audio/gavel-cut.mp3", { volume: VOL_GAVEL });
+  try {
+    SOUND.ambient.volume = VOL_AMBIENT;
+    await SOUND.ambient.play();       // a rejected promise means "no audio here"
+    SOUND.on = true;
+  } catch {
+    SOUND.on = false;                 // missing file or refused playback: stay off
+  }
+  paintSoundButton();
+}
+document.getElementById("sound").onclick = () => setSound(!SOUND.on);
+
+/* Returns whether the roll actually started. With sound off - or an unplayable
+   file - the verdict opens immediately: three silent seconds look like a hang. */
+async function playDrumroll() {
+  if (!SOUND.on || !SOUND.drums) return false;
+  try {
+    SOUND.drums.currentTime = 0;
+    await SOUND.drums.play();
+  } catch {
+    return false;
+  }
+  if (SOUND.ambient) SOUND.ambient.volume = VOL_AMBIENT_DUCKED;
+  return true;
+}
+/* One strike when an objection is filed. A missing file or a refused play is
+   silence, never an error: the arena works with no audio at all. */
+function playGavel() {
+  if (!SOUND.on || !SOUND.gavel) return;
+  try {
+    SOUND.gavel.currentTime = 0;
+    SOUND.gavel.play().catch(() => {});
+  } catch {
+    /* unplayable: stay silent */
+  }
+}
+function endDrumroll() {
+  if (SOUND.ambient && SOUND.on) SOUND.ambient.volume = VOL_AMBIENT;
+}
+
+const feeds = {};
+document.querySelectorAll(".col").forEach(col => feeds[col.dataset.agent] = col.querySelector(".feed"));
+const cards = new Map();       // claim id -> card element in the record
+let claimsById = {};           // ruling events carry only an id
+let notesById = {};            // judge note per claim, for the evidence section
+let statusById = {};           // final status per claim
+let claimCount = 0;
+let aborter = null;
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+}
+const shortId = id => String(id ?? "").slice(0, 4);
+
+/* first sentence, capped — used by bubbles and by collapsed headlines */
+function firstSentence(text, cap = BUBBLE_CHARS) {
+  const clean = String(text ?? "").trim().replace(/\s+/g, " ");
+  const stop = clean.search(/\.(\s|$)/);
+  let out = stop > 0 ? clean.slice(0, stop + 1) : clean;
+  if (out.length > cap) out = `${out.slice(0, cap).trimEnd()}…`;
+  return out;
+}
+
+/* ---------------- confirmations ----------------
+   Every receipt in the arena goes through one pop-up, queued: two confirmations
+   arriving together would otherwise paint over each other. */
+const TOAST_MS = 1800;
+const TOAST_FADE_MS = 240;           /* mirrors --dur-toast, plus a frame */
+const TOASTS = [];
+let toasting = false;
+
+function toast(line, sub = "") {
+  TOASTS.push({ line, sub });
+  runToasts();
+}
+async function runToasts() {
+  if (toasting) return;
+  toasting = true;
+  const el = document.getElementById("toast");
+  const lineEl = el.querySelector(".line");
+  const subEl = el.querySelector(".sub");
+  try {
+    while (TOASTS.length) {
+      const { line, sub } = TOASTS.shift();
+      lineEl.textContent = line;
+      subEl.textContent = sub;
+      subEl.hidden = !sub;
+      el.classList.add("show");
+      await sleep(TOAST_MS);
+      el.classList.remove("show");
+      await sleep(TOAST_FADE_MS);
+    }
+  } finally {
+    toasting = false;
+  }
+}
+
+/* ---------------- the wager ----------------
+   A simulated bet: a side, a stake in $CREDIT, settled on the verdict screen
+   against the closing balances. Nothing leaves the browser. */
+const AMOUNTS = [5, 10, 15];         /* the only stakes on offer, in $CREDIT */
+const OPENING_ODDS = 2;              /* balances are equal at the start: even money */
+
+/* The opening pick, chosen in the menu, and every ticket bought afterwards.
+   A ticket keeps the odds it was bought at - that is the whole point of buying
+   in play - so settlement is a sum over tickets, not one multiplication. */
+const BET = { side: null, stake: 10 };
+let TICKETS = [];
+
+function otherSide(side) { return side === "bull" ? "bear" : "bull"; }
+
+function fmtCredit(value) {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+function signed(value) { return (value >= 0 ? "+" : "-") + fmtCredit(Math.abs(value)); }
+
+function currentBudgets() {
+  const read = agent => Number(document.querySelector(`[data-num="${agent}"]`)?.textContent) || 0;
+  return { bull: read("bull"), bear: read("bear") };
+}
+/* Payout per unit staked: (a + b) / a, where a is your side's balance. A side on
+   zero cannot be priced - backing it would pay infinity - so it returns null. */
+function oddsFor(side, budgets = currentBudgets()) {
+  const mine = budgets[side];
+  if (!mine) return null;
+  return (mine + budgets[otherSide(side)]) / mine;
+}
+
+/* The header label is the whole book, not just the opening pick: total staked
+   per side and how many tickets it took. Backing both sides is legitimate - the
+   odds move during the case - so both are shown, split. */
+function betBook() {
+  const staked = { bull: 0, bear: 0 };
+  for (const ticket of TICKETS) staked[ticket.side] += ticket.stake;
+  const sides = ["bull", "bear"].filter(side => staked[side] > 0);
+  return { staked, sides, tickets: TICKETS.length };
+}
+function paintBetChip() {
+  const chip = document.getElementById("bet-chip");
+  const { staked, sides, tickets } = betBook();
+
+  if (!tickets) {                      // before the case starts: the menu pick
+    chip.hidden = !BET.side;
+    if (BET.side) {
+      chip.textContent = `your bet: ${AGENT_NAME[BET.side]} · ${BET.stake} $credit`;
+      chip.style.setProperty("--bet-colour", `var(--${BET.side})`);
+    }
+    return;
+  }
+  const parts = sides.map(side => `${AGENT_NAME[side]} ${staked[side]} $credit`);
+  chip.hidden = false;
+  chip.textContent =
+    `your bet: ${parts.join(" + ")} · ${tickets} ticket${tickets === 1 ? "" : "s"}`;
+  // one side keeps its colour; both sides is the court's own gold
+  chip.style.setProperty("--bet-colour", sides.length === 1 ? `var(--${sides[0]})` : "var(--gold)");
+}
+
+/* ---- the menu: one click picks a side AND a stake ---- */
+function buildAmountRows() {
+  for (const side of ["bull", "bear"]) {
+    const row = document.querySelector(`[data-amounts="${side}"]`);
+    row.innerHTML = AMOUNTS.map(
+      amount => `<button type="button" class="amount" data-bet="${side}" data-amount="${amount}" aria-pressed="false">${amount}</button>`,
+    ).join("");
+  }
+  for (const button of document.querySelectorAll("[data-amounts] .amount")) {
+    button.onclick = () => selectBet(button.dataset.bet, Number(button.dataset.amount));
+  }
+}
+function selectBet(side, stake = BET.stake) {
+  BET.side = side;
+  if (side) BET.stake = stake;
+  paintBet();
+}
+function paintBet() {
+  for (const button of document.querySelectorAll(".bet-side[data-bet]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.bet === BET.side));
+  }
+  for (const button of document.querySelectorAll("[data-amounts] .amount")) {
+    const on = button.dataset.bet === BET.side && Number(button.dataset.amount) === BET.stake;
+    button.setAttribute("aria-pressed", String(on));
+  }
+  document.getElementById("bet-skip").setAttribute("aria-pressed", String(!BET.side));
+
+  const summary = document.getElementById("bet-summary");
+  summary.textContent = BET.side
+    ? `betting ${BET.stake} $credit on ${AGENT_NAME[BET.side]}`
+    : "no bet placed";
+  summary.style.setProperty("--bet-colour", BET.side ? `var(--${BET.side})` : "var(--parchment-dim)");
+  paintBetChip();
+}
+
+/* ---- in play: buy more at the odds the balances give right now ---- */
+function buildAddRows() {
+  for (const side of ["bull", "bear"]) {
+    const row = document.querySelector(`[data-add-amounts="${side}"]`);
+    row.innerHTML = AMOUNTS.map(
+      amount => `<button type="button" class="amount" data-add-bet="${side}" data-amount="${amount}">${amount}</button>`,
+    ).join("");
+  }
+  for (const button of document.querySelectorAll("[data-add-bet]")) {
+    button.onclick = () => addTicket(button.dataset.addBet, Number(button.dataset.amount), button);
+  }
+}
+function paintOdds() {
+  const budgets = currentBudgets();
+  for (const side of ["bull", "bear"]) {
+    const odds = oddsFor(side, budgets);
+    document.querySelector(`[data-odds="${side}"]`).textContent = odds ? odds.toFixed(2) : "—";
+    for (const button of document.querySelectorAll(`[data-add-bet="${side}"]`)) {
+      button.disabled = !odds;
+    }
+  }
+}
+function paintTickets() {
+  const risked = TICKETS.reduce((sum, ticket) => sum + ticket.stake, 0);
+  const cell = document.getElementById("bet-tickets");
+  cell.textContent = TICKETS.length
+    ? `${TICKETS.length} ticket(s) · ${risked} $credit at risk`
+    : "no bet placed";
+  paintBetChip();                      // the header label follows the book
+}
+function addTicket(side, stake, button) {
+  const odds = oddsFor(side);
+  if (!odds) return;                   // a busted side has no price
+  const round = document.querySelector("[data-round]").textContent;
+  TICKETS.push({ side, stake, odds, label: `round ${round}` });
+  paintTickets();
+  if (button && !reducedMotion) {       // short flash: the click landed
+    button.classList.remove("taken");
+    void button.offsetWidth;
+    button.classList.add("taken");
+  }
+  toast("bet placed", `+${stake} $credit on ${AGENT_NAME[side]} @ ${odds.toFixed(2)}`);
+  logline(`Bet added: ${AGENT_NAME[side]} ${stake} $credit @ ${odds.toFixed(2)}`, "bet");
+}
+
+/* The portraits are anchored in rem tokens, so the stake row is measured onto
+   them instead of guessing an offset: read the name plate, sit just below it. */
+const SIDEBET_GAP = 8;                 /* mirrors --sidebet-gap */
+function placeSideBets() {
+  const host = document.getElementById("top").getBoundingClientRect();
+  for (const side of ["bull", "bear"]) {
+    const caption = actorEls[side]?.querySelector(".caption");
+    const block = document.querySelector(`[data-side-bet="${side}"]`);
+    if (!caption || !block) continue;
+    const box = caption.getBoundingClientRect();
+    block.style.left = `${box.left + box.width / 2 - host.left}px`;
+    block.style.top = `${box.bottom - host.top + SIDEBET_GAP}px`;
+  }
+}
+/* Offered from the first settlement onwards: before that both sides are still on
+   100, so every price is 2.00 and the number carries no information. */
+function offerAddBet(on) {
+  document.getElementById("side-bets").hidden = !on;
+  document.getElementById("bet-tickets").hidden = !on;
+  if (on) { paintOdds(); paintTickets(); placeSideBets(); }
+}
+
+/* ---- settlement: sum the tickets, show the breakdown ---- */
+function settleBet(budgets) {
+  const line = document.getElementById("v-bet");
+  const rows = document.getElementById("v-bet-rows");
+  line.classList.remove("push", "none");
+  rows.hidden = true;
+  rows.innerHTML = "";
+
+  if (!TICKETS.length) {
+    line.hidden = false;
+    line.classList.add("none");
+    line.textContent = "no bet placed";
+    line.style.setProperty("--bet-colour", "var(--parchment-dim)");
+    return;
+  }
+
+  const bull = budgets?.bull ?? 0;
+  const bear = budgets?.bear ?? 0;
+  const draw = Math.abs(bull - bear) < DRAW_MARGIN;
+  const winner = bull > bear ? "bull" : "bear";
+  line.hidden = false;
+
+  // Same draw margin as the scoreline, so the bet can never contradict the
+  // result printed under it.
+  const settled = TICKETS.map(ticket => ({
+    ...ticket,
+    net: draw ? 0 : (ticket.side === winner ? ticket.stake * (ticket.odds - 1) : -ticket.stake),
+  }));
+  rows.hidden = false;
+  rows.innerHTML = settled
+    .map(ticket => {
+      const tone = ticket.net > 0 ? "won" : (ticket.net < 0 ? "lost" : "");
+      return `<div class="row"><span>${ticket.label}</span>` +
+        `<span>${AGENT_NAME[ticket.side]} ${ticket.stake} @ ${ticket.odds.toFixed(2)}</span>` +
+        `<span class="${tone}">${draw ? "returned" : signed(ticket.net)}</span></div>`;
+    })
+    .join("");
+
+  if (draw) {
+    line.classList.add("push");
+    line.textContent = "push — all bets returned";
+    line.style.setProperty("--bet-colour", "var(--parchment)");
+    return;
+  }
+  const net = settled.reduce((sum, ticket) => sum + ticket.net, 0);
+  if (Math.abs(net) < 0.05) {
+    line.classList.add("push");
+    line.textContent = "push — broke even";
+    line.style.setProperty("--bet-colour", "var(--parchment)");
+    return;
+  }
+  line.textContent = net > 0
+    ? `you were right — +${fmtCredit(net)} $credit`
+    : `you were wrong — -${fmtCredit(-net)} $credit`;
+  line.style.setProperty("--bet-colour", net > 0 ? "var(--state-ok)" : "var(--bear)");
+}
+
+/* ---------------- asset picker + reference card ---------------- */
+const CUSTOM = "__custom__";
+
+function currentAsset() {
+  const pick = document.getElementById("asset-pick").value;
+  if (pick !== CUSTOM) return pick;
+  return document.getElementById("asset").value.trim().toUpperCase() || "NVDA";
+}
+function currentKind() {
+  const ticker = currentAsset();
+  // kind comes from assets.json; only an unlisted ticker needs the viewer to say
+  if (ASSETS[ticker]) return ASSETS[ticker].kind || "equity";
+  return document.getElementById("kind").value;
+}
+const DASH = "—";
+/* What a token is worth is a different question from what a company is worth,
+   so the two kinds get different rows. A token row with no figure is dropped
+   rather than shown as a dash - assets.json is filled in by hand and half-empty
+   columns of dashes read like a broken feed. */
+const PANEL_ROWS = {
+  equity: [
+    ["market cap", "market_cap"],
+    ["fwd p/e", "pe_forward"],
+    ["revenue ttm", "revenue_ttm"],
+    ["profit margin", "profit_margin"],
+  ],
+  token: [
+    ["market cap", "market_cap"],
+    ["fdv", "fdv"],
+    ["tvl", "tvl"],
+    ["revenue 30d", "revenue_30d"],
+    ["holders rev 30d", "holders_revenue_30d"],
+  ],
+};
+const EMPTY_FIELD = new Set(["", "-", DASH, "n/a", "na", "none", "null", "?"]);
+function isBlank(value) {
+  return value == null || EMPTY_FIELD.has(String(value).trim().toLowerCase());
+}
+function assetPanelHTML(ticker) {
+  const data = ASSETS[ticker] || {};
+  const kind = data.kind || "equity";
+  const rows = (PANEL_ROWS[kind] || PANEL_ROWS.equity)
+    .filter(([, key]) => kind !== "token" || !isBlank(data[key]))
+    .map(([label, key]) => `<dt>${esc(label)}</dt><dd>${esc(data[key] || DASH)}</dd>`)
+    .join("");
+  return `
+    <p class="ticker">${esc(ticker || DASH)}</p>
+    <p class="name">${esc(data.name || "unlisted ticker")}</p>
+    ${rows ? `<dl>${rows}</dl>` : ""}
+    ${data.blurb ? `<p class="blurb">${esc(data.blurb)}</p>` : ""}
+    <p class="footnote">static reference data · as of ${esc(data.as_of || DASH)}</p>`;
+}
+function renderAssetCard(ticker) {
+  const html = assetPanelHTML(ticker);
+  for (const id of ["asset-card", "intro-asset-card", "menu-asset-card"]) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+}
+function initPicker() {
+  const pick = document.getElementById("asset-pick");
+  const custom = document.getElementById("asset");
+  const kind = document.getElementById("kind");
+  const tickers = Object.keys(ASSETS);
+  pick.innerHTML = [
+    ...tickers.map(t => `<option value="${t}">${t}</option>`),
+    `<option value="${CUSTOM}">custom…</option>`,
+  ].join("");
+  if (!tickers.length) pick.value = CUSTOM;   // no reference file: custom only
+
+  const sync = () => {
+    const isCustom = pick.value === CUSTOM;
+    custom.hidden = !isCustom;
+    kind.hidden = !isCustom;      // only a custom ticker needs the equity/token call
+    renderAssetCard(currentAsset());
+  };
+  pick.onchange = sync;
+  custom.oninput = () => renderAssetCard(currentAsset());
+  sync();
+}
+
+/* ---------------- stage ---------------- */
+const actorEls = {};
+document.querySelectorAll(".actor").forEach(el => actorEls[el.dataset.agent] = el);
+let speakTimer = null;
+
+function initStage() {
+  document.querySelectorAll("[data-name]").forEach(el => {
+    el.textContent = AGENT_NAME[el.dataset.name] || el.dataset.name;
+  });
+  for (const agent of ACTORS) {
+    const label = document.querySelector(`[data-actor-model="${agent}"]`);
+    if (label) label.textContent = MODEL_LABEL[agent] || "";
+  }
+  clearSpeaker();
+  clearBubbles();
+}
+function clearSpeaker() {
+  for (const el of Object.values(actorEls)) el.classList.remove("speaking", "dimmed", "talking");
+}
+function setSpeaker(agent) {
+  // The quant has no podium in the artwork: while the witness computes, nobody on
+  // the bench holds the floor, so all three dim.
+  for (const [name, el] of Object.entries(actorEls)) {
+    el.classList.toggle("speaking", name === agent);
+    el.classList.toggle("dimmed", name !== agent);
+  }
+  clearTimeout(speakTimer);
+  speakTimer = setTimeout(clearSpeaker, SPEAK_MS);
+}
+/* The stream has no "thinking" event, so the turn is inferred: after each claim
+   the floor passes to the next agent in TURN_ORDER, after a ruling the judge
+   keeps it until the next round. */
+function setTurn(agent, mode = "wait") {
+  const el = document.getElementById("turn");
+  el.hidden = false;
+  const who = el.querySelector(".who");
+  if (!agent) {
+    who.textContent = "court in session…";
+    el.style.setProperty("--turn-colour", "var(--turn)");
+    return;
+  }
+  const verb = mode === "speaking" ? "is speaking…" : (TURN_VERB[agent] || "is working…");
+  who.textContent = `${AGENT_NAME[agent] || agent} ${verb}`;
+  el.style.setProperty("--turn-colour", `var(--${agent})`);
+}
+
+/* CLAIM n / N and a seconds counter since the last event. N is the number of
+   speaking turns (agents x rounds); an agent may make more than one claim in a
+   turn, so we lift the ceiling rather than show a broken fraction. */
+let plannedTurns = 0;
+let lastEventAt = 0;
+let sinceTimer = null;
+
+function setClaimProgress() {
+  const total = Math.max(plannedTurns, claimCount);
+  document.querySelector("[data-claim-progress]").textContent =
+    total ? `claim ${claimCount} / ${total}` : "";
+}
+function markEvent() {
+  lastEventAt = performance.now();
+  paintSince();
+}
+function paintSince() {
+  const cell = document.querySelector("[data-since]");
+  if (!lastEventAt) { cell.textContent = ""; return; }
+  cell.textContent = `${Math.floor((performance.now() - lastEventAt) / 1000)}s`;
+}
+function startSinceClock() {
+  clearInterval(sinceTimer);
+  sinceTimer = setInterval(paintSince, 1000);
+}
+function stopSinceClock() { clearInterval(sinceTimer); sinceTimer = null; }
+function nextTurnAfter(agent) {
+  const i = TURN_ORDER.indexOf(agent);
+  return i === -1 ? null : TURN_ORDER[(i + 1) % TURN_ORDER.length];
+}
+function hideTurn() { document.getElementById("turn").hidden = true; }
+
+function clearBubbles() {
+  finishTyping();
+  document.querySelectorAll("[data-bubbles]").forEach(stack => {
+    stack.innerHTML = "";
+    stack.dataset.count = "0";
+  });
+}
+
+/* One typewriter at a time. If the next event arrives mid-line we dump the rest
+   of the text immediately - the animation must never hold up the stream. */
+let typer = null;
+function finishTyping() {
+  if (!typer) return;
+  const { timer, done } = typer;
+  clearInterval(timer);
+  typer = null;
+  done();
+}
+function typeInto(bubble, text, onDone, agent) {
+  const said = bubble.querySelector(".said");
+  const meta = bubble.querySelector(".figure-line");
+  const actor = agent ? actorEls[agent] : null;
+
+  // Reserve the final height first, so the box does not grow line by line and
+  // drag the tail around while typing.
+  said.textContent = text;
+  said.style.minHeight = `${said.offsetHeight}px`;
+
+  const reveal = () => {
+    said.textContent = text;
+    bubble.classList.remove("typing");
+    actor?.classList.remove("talking");
+    if (meta) meta.hidden = false;
+    onDone?.();
+  };
+  if (reducedMotion) { reveal(); return; }
+
+  said.textContent = "";
+  bubble.classList.add("typing");
+  actor?.classList.add("talking");
+  let i = 0;
+  const timer = setInterval(() => {
+    i += 1;
+    said.textContent = text.slice(0, i);
+    if (i >= text.length) finishTyping();
+  }, 1000 / TYPE_CPS);
+  typer = { timer, done: reveal };
+}
+
+/* The stack has to fit between the HUD and the portrait - or, for the judge,
+   between the portrait and the stage footer. Try full size, then two tighter
+   levels, and only then drop the oldest line. Never clip one. */
+function fitStack(stack, agent) {
+  const frame = actorEls[agent]?.querySelector(".frame");
+  const footer = document.querySelector(".stage-footer");
+  const hud = document.getElementById("hud");
+  if (!frame || !footer || !hud) return;
+
+  const gap = (parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue("--bubble-room-gap")) || 0.5) * 16;
+  const box = frame.getBoundingClientRect();
+  const room = agent === "judge"
+    ? footer.getBoundingClientRect().top - box.bottom - gap
+    : box.top - hud.getBoundingClientRect().bottom - gap;
+
+  for (const level of ["", "tight", "tighter", "tightest"]) {
+    stack.classList.remove("tight", "tighter", "tightest");
+    if (level) stack.classList.add(level);
+    if (stack.scrollHeight <= room) return;
+  }
+  while (stack.children.length > 1 && stack.scrollHeight > room) {
+    stack.firstElementChild.remove();       // whole lines only, never halves
+    stack.dataset.count = String(stack.children.length);
+  }
+}
+
+/* Claims stack up: the newest sits closest to the portrait, older ones fade. */
+function setBubble(agent, said, figure, onDone) {
+  finishTyping();
+  const stack = document.querySelector(`[data-bubbles="${agent}"]`);
+  if (!stack) { onDone?.(); return; }
+
+  stack.querySelectorAll(".bubble").forEach(old => old.classList.add("stale"));
+  while (stack.children.length >= BUBBLE_STACK) stack.firstElementChild.remove();
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = `
+    <p class="said"></p>
+    ${figure ? `<p class="figure-line" hidden>${esc(figure)}</p>` : ""}`;
+  stack.appendChild(bubble);
+  stack.dataset.count = String(stack.children.length);
+  fitStack(stack, agent);
+
+  typeInto(bubble, said, onDone, agent);
+}
+
+/* ---------------- HUD ---------------- */
+function buildSegments(bar) {
+  bar.innerHTML = "";
+  for (let i = 0; i < SEGMENTS; i++) {
+    const seg = document.createElement("span");
+    seg.className = "seg";
+    bar.appendChild(seg);
+  }
+}
+function paintSegments(bar, value, min = BAR_MIN, max = BAR_MAX) {
+  const share = (value - min) / (max - min);
+  const lit = Math.max(0, Math.min(SEGMENTS, Math.round(share * SEGMENTS)));
+  [...bar.querySelectorAll(".seg")].forEach((seg, i) => seg.classList.toggle("spent", i >= lit));
+}
+/* portrait jerk + big pixel number over the head, plus one camera shake */
+function strikeActor(agent, delta) {
+  const dir = delta < 0 ? "down" : "up";
+  const actor = actorEls[agent];
+  if (actor && !reducedMotion) {
+    actor.dataset.hit = dir;
+    actor.classList.remove("struck");
+    void actor.offsetWidth;
+    actor.classList.add("struck");
+    setTimeout(() => { actor.classList.remove("struck"); delete actor.dataset.hit; }, HIT_MS);
+  }
+  const host = actor || document.querySelector(`[data-bar="${agent}"]`)?.closest(".fighter");
+  if (host) {
+    const num = document.createElement("span");
+    num.className = `hit-num ${dir}`;
+    num.textContent = `${delta > 0 ? "+" : ""}${delta}`;
+    host.appendChild(num);
+    setTimeout(() => num.remove(), HIT_NUM_MS);
+  }
+  if (delta < 0 && !reducedMotion) {
+    const top = document.getElementById("top");
+    top.classList.remove("shaken");
+    void top.offsetWidth;
+    top.classList.add("shaken");
+    setTimeout(() => top.classList.remove("shaken"), CAM_MS);
+  }
+}
+/* The rope shows the balance of power, not absolute credits: the split is
+   bull / (bull + bear), so an even match sits exactly in the middle. */
+let ropeSplit = 50;
+function paintRope(bull, bear) {
+  const total = bull + bear;
+  ropeSplit = total > 0 ? (bull / total) * 100 : 50;
+  document.querySelector("[data-rope]").style.setProperty("--split", `${ropeSplit.toFixed(1)}%`);
+  paintStakes();
+}
+
+/* Stakes riding on claims the judge has not ruled on yet: id -> {agent, stake}.
+   The strip sits against the boundary on the owner's side of the rope. */
+const pendingStakes = new Map();
+function paintStakes() {
+  const credits = agent => Number(document.querySelector(`[data-num="${agent}"]`).textContent);
+  const total = credits("bull") + credits("bear");
+
+  for (const agent of ["bull", "bear"]) {
+    const staked = [...pendingStakes.values()]
+      .filter(entry => entry.agent === agent)
+      .reduce((sum, entry) => sum + entry.stake, 0);
+
+    const strip = document.querySelector(`[data-stake="${agent}"]`);
+    const label = document.querySelector(`[data-at-stake="${agent}"]`);
+    const share = total > 0 ? Math.min(staked / total * 100, agent === "bull" ? ropeSplit : 100 - ropeSplit) : 0;
+
+    strip.hidden = staked === 0;
+    strip.classList.toggle("live", staked > 0);
+    strip.style.width = `${share.toFixed(1)}%`;
+    strip.style.left = agent === "bull" ? `${(ropeSplit - share).toFixed(1)}%` : `${ropeSplit.toFixed(1)}%`;
+
+    label.hidden = staked === 0;
+    label.textContent = staked ? `${staked} at stake` : "";
+  }
+}
+function stakeClaim(claim) {
+  if (claim.stake && (claim.agent === "bull" || claim.agent === "bear")) {
+    pendingStakes.set(claim.id, { agent: claim.agent, stake: claim.stake });
+    paintStakes();
+  }
+}
+function settleStake(claimId) {
+  if (pendingStakes.delete(claimId)) paintStakes();
+}
+function initHud(rounds) {
+  // Only the two parties are on the rope; the witness is settled on the verdict sheet.
+  for (const agent of ["bull", "bear"]) {
+    document.querySelector(`[data-num="${agent}"]`).textContent = CREDITS_MAX;
+    document.querySelector(`[data-model="${agent}"]`).textContent = MODEL_LABEL[agent] || "";
+  }
+  pendingStakes.clear();
+  paintRope(CREDITS_MAX, CREDITS_MAX);
+  document.querySelector("[data-round]").textContent = "—";
+  document.querySelector("[data-rounds]").textContent = rounds ?? "—";
+  setClaimCount(0);
+}
+function setRound(round, rounds) {
+  document.querySelector("[data-round]").textContent = round;
+  if (rounds) document.querySelector("[data-rounds]").textContent = rounds;
+}
+function setClaimCount(n) {
+  claimCount = n;
+  document.querySelector("[data-claim-count]").textContent = n;
+  setClaimProgress();
+}
+/* Only the number, the segments and a short delta live in the HUD.
+   The judge's reasoning belongs to the record and to the bubble. */
+function setCredits(budgets) {
+  for (const [agent, value] of Object.entries(budgets || {})) {
+    // the quant has no readout on the stage: its balance shows on the verdict sheet
+    const num = document.querySelector(`[data-num="${agent}"]`);
+    if (!num) continue;
+    const before = Number(num.textContent);
+    if (before === value) continue;
+    num.textContent = value;
+    strikeActor(agent, value - before);
+  }
+  const read = agent => Number(document.querySelector(`[data-num="${agent}"]`).textContent);
+  paintRope(budgets?.bull ?? read("bull"), budgets?.bear ?? read("bear"));
+}
+
+/* ---------------- record cards (collapsed by default) ---------------- */
+function createCard(claim) {
+  const el = document.createElement("article");
+  el.className = "card collapsed" + (claim.claim_type === "information_gap" ? " gap" : "");
+  el.dataset.state = claim.status;
+  el.dataset.id = claim.id;
+  el.dataset.round = claim.round;
+
+  const stateLabel = esc(STATE_LABEL[claim.status] || claim.status);
+  el.innerHTML = `
+    <button type="button" class="headline" aria-expanded="false">
+      <span class="state">${stateLabel}</span>
+      <span class="line">${esc(firstSentence(claim.text))}</span>
+      <span class="id">${esc(shortId(claim.id))}</span>
+      ${claim.targets ? `<span class="reply-to">↳ ${esc(shortId(claim.targets))}</span>` : ""}
+    </button>
+    <div class="full">
+      <div class="meta">
+        <span class="state">${stateLabel}</span>
+        <span class="kind">${esc(TYPE_LABEL[claim.claim_type] || claim.claim_type)}</span>
+        <span class="id">${esc(shortId(claim.id))}</span>
+      </div>
+      <p class="claim">${esc(claim.text)}</p>
+      <div class="figures">
+        <span class="figure"><span class="k">stake</span><span class="v">${claim.stake ?? "—"}</span></span>
+        <span class="figure"><span class="k">confidence</span><span class="v">${claim.confidence ?? "—"}</span></span>
+        ${claim.targets ? `<button type="button" class="replies" data-target="${esc(claim.targets)}">↳ replies to ${esc(shortId(claim.targets))}</button>` : ""}
+      </div>
+    </div>`;
+
+  const headline = el.querySelector(".headline");
+  headline.onclick = () => {
+    const collapsed = el.classList.toggle("collapsed");
+    headline.setAttribute("aria-expanded", String(!collapsed));
+  };
+  const replies = el.querySelector(".replies");
+  if (replies) replies.onclick = event => { event.stopPropagation(); revealCard(replies.dataset.target); };
+  return el;
+}
+function addClaim(claim) {
+  const el = createCard(claim);
+  (feeds[claim.agent] || feeds.judge).appendChild(el);
+  cards.set(claim.id, el);
+  setClaimCount(claimCount + 1);
+  return el;
+}
+function setCardState(el, state) {
+  el.dataset.state = state;
+  const label = STATE_LABEL[state] || state;
+  el.querySelectorAll(".state").forEach(node => node.textContent = label);
+}
+function decorate(el, claim, note) {
+  const state = el.dataset.state;
+  const full = el.querySelector(".full");
+  full.querySelectorAll(".note, .source, details").forEach(node => node.remove());
+
+  if (state === "verified" && claim?.source_url) {
+    full.insertAdjacentHTML("beforeend", `
+      <p class="source">Source: <a href="${esc(claim.source_url)}" target="_blank" rel="noopener">${esc(claim.source_url)}</a>
+      ${claim.source_quote ? `<q>${esc(claim.source_quote)}</q>` : ""}</p>`);
+  }
+  if (claim?.code && state !== "pending") {
+    // [BLAD]/[OSTRZEZENIE] are the pre-translation prefixes, kept so runs recorded
+    // before the switch to English still render their failures in red.
+    const failed = /^\[ERROR\]|^\[WARNING\]|^\[BLAD\]|^\[OSTRZEZENIE\]/.test(claim.result || "");
+    full.insertAdjacentHTML("beforeend", `
+      <details>
+        <summary>Code and result</summary>
+        <pre>${esc(claim.code)}</pre>
+        <pre class="result ${failed ? "failed" : ""}">${esc(claim.result || "no result")}</pre>
+      </details>`);
+  }
+  if (note) full.insertAdjacentHTML("beforeend", `<p class="note"><b>Judge</b> ${esc(note)}</p>`);
+}
+function markHit(el, state) {
+  const effect = LOSS_STATES.has(state) ? "hit" : WIN_STATES.has(state) ? "confirmed" : null;
+  if (!effect || reducedMotion) return;
+  el.classList.remove("hit", "confirmed");
+  void el.offsetWidth;
+  el.classList.add(effect);
+  setTimeout(() => el.classList.remove(effect), HIT_MS);
+}
+function revealCard(id) {
+  const el = cards.get(id);
+  if (!el) return;
+  el.classList.remove("collapsed");
+  el.querySelector(".headline")?.setAttribute("aria-expanded", "true");
+  el.scrollIntoView({ block: "center", behavior: SCROLL });
+  if (reducedMotion) return;
+  el.classList.remove("flash");
+  void el.offsetWidth;
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), FLASH_MS);
+}
+
+function addJudgeNote(event, claim) {
+  const el = document.createElement("article");
+  el.className = "verdict-note";
+  el.dataset.state = event.status;
+
+  const penalty = event.ruling.calibration_penalty || 0;
+  const cost = [];
+  if (LOSS_STATES.has(event.status) && claim?.stake) cost.push(`stake −${claim.stake}`);
+  if (penalty) cost.push(`calibration −${penalty}`);
+  if (WIN_STATES.has(event.status)) cost.push("evidence bonus +3");
+
+  el.innerHTML = `
+    <div class="head">
+      <span class="state">${esc(STATE_LABEL[event.status] || event.status)}</span>
+      <span class="kind">${esc(AGENT_NAME[claim?.agent] || claim?.agent || "")}</span>
+      <span class="id">${esc(shortId(event.ruling.claim_id))}</span>
+    </div>
+    <p class="body">${esc(event.judge_note || event.ruling.note)}</p>
+    ${cost.length ? `<p class="cost">${esc(cost.join(" · "))}</p>` : ""}`;
+  feeds.judge.appendChild(el);
+}
+function logline(text, extra) {
+  const el = document.createElement("p");
+  el.className = "logline" + (extra ? ` ${extra}` : "");
+  el.textContent = text;
+  feeds.judge.appendChild(el);
+}
+
+/* ---------------- match overlays ---------------- */
+/* The fight card: ticker, rounds, both models and the source pack. The pack only
+   exists once the stream sends sources_added (round 0), so the panel opens with a
+   placeholder, fills in when that event lands, and then holds for INTRO_MS. */
+let introFill = null;
+
+/* The stream carries source_type, title, url and published_at - no form type.
+   We read 10-K / 10-Q / 8-K out of the file name when it is there, fall back to
+   "SEC filing", and date it from published_at or from a YYYYMMDD in the name. */
+const FORM_TYPES = /\b(10-K|10-Q|8-K|S-1|20-F|6-K|DEF 14A)\b/i;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function prettyDate(doc) {
+  const iso = doc.published_at || "";
+  const stamp = `${doc.title || ""} ${doc.url || ""}`.match(/(20\d{2})(\d{2})(\d{2})/);
+  const [y, m, d] = iso
+    ? iso.split("-").map(Number)
+    : stamp ? [Number(stamp[1]), Number(stamp[2]), Number(stamp[3])] : [];
+  if (!y || !m || !d) return null;
+  return `${MONTHS[m - 1]} ${d}, ${y}`;
+}
+function sourceLabel(doc) {
+  const date = prettyDate(doc);
+  if (doc.source_type === "filing") {
+    const form = FORM_TYPES.exec(`${doc.title || ""} ${doc.url || ""}`);
+    const kind = form ? form[1].toUpperCase() : "SEC filing";
+    return { type: kind, text: date || (doc.title || doc.url) };
+  }
+  return { type: doc.source_type, text: doc.title || doc.url };
+}
+function renderIntroPack(docs) {
+  const list = document.getElementById("intro-pack");
+  const empty = document.getElementById("intro-pack-empty");
+  list.innerHTML = (docs || []).map(doc => {
+    const { type, text } = sourceLabel(doc);
+    return `<li><span class="type">${esc(type)}</span><span>${esc(text)}</span></li>`;
+  }).join("");
+  empty.hidden = (docs || []).length > 0;
+}
+
+async function showIntro(asset, rounds) {
+  document.getElementById("intro-asset").textContent = asset;
+  document.getElementById("intro-rounds").textContent = `${rounds ?? "?"} round${rounds === 1 ? "" : "s"}`;
+  document.getElementById("intro-bull-name").textContent = AGENT_NAME.bull;
+  document.getElementById("intro-bear-name").textContent = AGENT_NAME.bear;
+  document.getElementById("intro-bull-model").textContent = MODEL_LABEL.bull;
+  document.getElementById("intro-bear-model").textContent = MODEL_LABEL.bear;
+  renderIntroPack([]);
+
+  const screen = document.getElementById("intro");
+  screen.classList.add("show");
+
+  let dismiss;
+  const clicked = new Promise(resolve => { dismiss = resolve; });
+  screen.onclick = () => dismiss();
+
+  // wait for the pack (or give up), then hold so it can actually be read
+  const packed = new Promise(resolve => { introFill = resolve; });
+  await Promise.race([packed, sleep(INTRO_WAIT_MS), clicked]);
+  await Promise.race([sleep(INTRO_MS), clicked]);
+
+  introFill = null;
+  screen.onclick = null;
+  screen.classList.remove("show");
+}
+
+function showRoundCard(round, rounds) {
+  if (reducedMotion) return;
+  const box = document.getElementById("round-card");
+  document.getElementById("round-big").textContent = `Round ${round}`;
+  document.getElementById("round-sub").textContent = `of ${rounds}`;
+  box.classList.remove("show");
+  void box.offsetWidth;
+  box.classList.add("show");
+  setTimeout(() => box.classList.remove("show"), ROUND_MS);
+}
+
+/* ---------------- verdict ---------------- */
+/* Who won, by how much, and which portrait each fighter gets. */
+function renderScoreline(budgets) {
+  const bull = budgets?.bull ?? 0;
+  const bear = budgets?.bear ?? 0;
+  const margin = Math.abs(bull - bear);
+  const draw = margin < DRAW_MARGIN;
+  const winner = draw ? null : (bull > bear ? "bull" : "bear");
+
+  const label = document.getElementById("v-winner");
+  label.textContent = draw ? "Draw" : (AGENT_NAME[winner] || winner);
+  label.style.setProperty("--winner-colour", draw ? "var(--fg)" : `var(--${winner})`);
+  document.getElementById("v-margin").textContent = draw
+    ? `both sides within ${DRAW_MARGIN} credits`
+    : `wins by ${margin} credit${margin === 1 ? "" : "s"}`;
+
+  /* what the result means for the reader, in one line */
+  const lean = document.getElementById("v-lean");
+  lean.textContent = draw
+    ? "Draw — no directional lean"
+    : `${AGENT_NAME[winner]} won — we lean more ${winner === "bull" ? "bullish" : "bearish"}`;
+  lean.style.setProperty("--lean-colour", draw ? "var(--fg-dim)" : `var(--${winner})`);
+
+  for (const agent of ["bull", "bear"]) {
+    const variant = draw ? "" : (agent === winner ? "-win" : "-lose");
+    document.getElementById(`v-${agent}-img`).src = `assets/${agent}${variant}.png`;
+    document.getElementById(`v-${agent}-tally`).textContent = budgets?.[agent] ?? "—";
+  }
+
+  /* Two segmented bars, same component as the HUD, so the gap reads at a glance.
+     The witness is not scored here - it appears in the closing balances. */
+  /* Only the two parties are scored here; the witness shows up in the closing
+     balances at the bottom of the sheet. */
+  const standings = document.getElementById("v-standings");
+  standings.innerHTML = ["bull", "bear"].map(agent => `
+    <div class="standing" data-agent="${agent}">
+      <div class="row">
+        <span>${esc(AGENT_NAME[agent] || agent)}</span>
+        <span class="num">${budgets?.[agent] ?? "—"}</span>
+      </div>
+      <div class="bar" data-standing="${agent}"></div>
+    </div>`).join("");
+  for (const agent of ["bull", "bear"]) {
+    const bar = standings.querySelector(`[data-standing="${agent}"]`);
+    buildSegments(bar);
+    paintSegments(bar, budgets?.[agent] ?? 0);
+  }
+}
+
+function showCourtBanner(on) {
+  document.getElementById("court-banner").hidden = !on;
+}
+/* verdict event -> optional drum roll -> the sheet */
+async function presentVerdict(verdict) {
+  const rolling = await playDrumroll();
+  if (rolling) {
+    showCourtBanner(true);
+    await sleep(DRUMROLL_MS);
+    showCourtBanner(false);
+    endDrumroll();
+  }
+  showVerdict(verdict);
+}
+
+function showVerdict(verdict) {
+  const confidence = verdict.confidence ?? 0;
+  renderScoreline(verdict.final_budgets);
+  settleBet(verdict.final_budgets);
+  document.getElementById("v-thesis").textContent = verdict.thesis || "";
+  document.getElementById("v-conf").textContent = confidence.toFixed(2);
+
+  const track = document.getElementById("v-track");
+  buildSegments(track);
+  paintSegments(track, confidence * CREDITS_MAX, 0, CREDITS_MAX);   /* confidence is its own 0..1 scale */
+
+  document.getElementById("v-falsifiers").innerHTML =
+    (verdict.falsifiers || []).map(f => `<li>${esc(f)}</li>`).join("") || "<li>None recorded</li>";
+
+  /* Evidence: every claim that survived — verified sources and executed
+     computations, both are evidence the thesis rests on. */
+  const evidence = document.getElementById("v-evidence");
+  evidence.innerHTML = "";
+  for (const [id, claim] of Object.entries(claimsById)) {
+    const status = statusById[id];
+    if (!WIN_STATES.has(status)) continue;
+    const card = createCard({ ...claim, status });
+    decorate(card, claim, notesById[id]);
+    evidence.appendChild(card);
+  }
+
+  document.getElementById("v-balances").innerHTML = AGENTS.map(agent => `
+    <div style="--role: var(--${agent})">
+      <span class="eyebrow">${esc(AGENT_NAME[agent] || agent)}</span>
+      <span class="num">${verdict.final_budgets?.[agent] ?? "—"}</span>
+    </div>`).join("");
+  document.getElementById("verdict").classList.add("show");
+}
+function hideVerdict() { document.getElementById("verdict").classList.remove("show"); }
+document.getElementById("v-dismiss").onclick = hideVerdict;
+document.getElementById("verdict").addEventListener("click", e => {
+  if (e.target.id === "verdict") hideVerdict();
+});
+addEventListener("keydown", e => { if (e.key === "Escape") hideVerdict(); });
+addEventListener("resize", () => {
+  document.querySelectorAll("[data-bubbles]").forEach(stack => {
+    if (stack.children.length) fitStack(stack, stack.dataset.bubbles);
+  });
+  if (!document.getElementById("side-bets").hidden) placeSideBets();
+});
+
+document.getElementById("record-cue").onclick = () => {
+  document.getElementById("arena").scrollIntoView({ behavior: SCROLL, block: "start" });
+};
+
+/* ---------------- event handling (same contract as before) ---------------- */
+/* ---------------- the speaking queue ----------------
+   The three agents are computed in parallel, so their claims can land in any
+   order and all at once. The arena buffers them and plays them one voice at a
+   time: every bubble of the bull, a beat, then the bear, a beat, then the quant.
+   Nothing else may talk over them - rulings wait their turn in the same queue. */
+const SPEAK_GAP_MS = 2000;
+const QUEUE = [];
+let draining = false;
+let lastVoice = null;
+
+const voiceOrder = agent => {
+  const at = TURN_ORDER.indexOf(agent);
+  return at === -1 ? TURN_ORDER.length : at;
+};
+
+function handle(event) {
+  markEvent();                         // the seconds counter follows ARRIVAL
+  QUEUE.push(event);
+  drainQueue();
+}
+
+/* Claims of one round play in agent order even when they arrive shuffled; every
+   other event keeps its arrival order, and no event is ever reordered across a
+   round boundary. */
+function takeNext() {
+  const head = QUEUE[0];
+  if (head.type !== "claim") return QUEUE.shift();
+  let best = 0;
+  for (let i = 1; i < QUEUE.length; i++) {
+    const other = QUEUE[i];
+    if (other.type !== "claim" || other.round !== head.round) break;
+    if (voiceOrder(other.claim.agent) < voiceOrder(QUEUE[best].claim.agent)) best = i;
+  }
+  return QUEUE.splice(best, 1)[0];
+}
+
+async function drainQueue() {
+  if (draining) return;
+  draining = true;
+  try {
+    while (QUEUE.length) {
+      const event = takeNext();
+      try {
+        await play(event);
+      } catch (err) {                  // one bad event must not stall the arena
+        console.error("event failed", event?.type, err);
+      }
+    }
+  } finally {
+    draining = false;
+  }
+}
+
+/* setBubble, but awaitable: resolves when the typewriter has finished. */
+function speak(agent, said, figure) {
+  return new Promise(resolve => setBubble(agent, said, figure, resolve));
+}
+
+async function play(event) {
+  if (event.type === "round_start") {
+    clearBubbles();
+    lastVoice = null;                  // a new round starts the sequence over
+    hideGalleryBar();
+    setTurn("bull");
+    setRound(event.round, event.rounds);
+    showRoundCard(event.round, event.rounds);
+    logline(`Round ${event.round} of ${event.rounds}`, "round");
+  } else if (event.type === "claim") {
+    const claim = event.claim;
+    claimsById[claim.id] = claim;
+    statusById[claim.id] = claim.status;
+    const el = addClaim(claim);        // the record fills immediately
+    if (claim.code) decorate(el, claim, null);
+
+    // a beat between voices, so it reads as a turn and not as a crowd
+    if (lastVoice && lastVoice !== claim.agent) {
+      setTurn(claim.agent);
+      await sleep(SPEAK_GAP_MS);
+    }
+    lastVoice = claim.agent;
+    setSpeaker(claim.agent);
+    stakeClaim(claim);                 // the stake goes on the rope, pulsing
+    setTurn(claim.agent, "speaking");
+    await speak(
+      claim.agent,
+      firstSentence(claim.text),
+      claim.stake == null ? "information gap" : `stake ${claim.stake} · confidence ${claim.confidence}`,
+    );
+    setTurn(nextTurnAfter(claim.agent));           // typed out: next model is thinking
+  } else if (event.type === "ruling") {
+    const claim = claimsById[event.ruling.claim_id];
+    const note = event.judge_note || event.ruling.note;
+    statusById[event.ruling.claim_id] = event.status;
+    notesById[event.ruling.claim_id] = note;
+
+    settleStake(event.ruling.claim_id);   // ruled on: the pulse stops
+    lastVoice = "judge";
+    setSpeaker("judge");
+    setTurn("judge", "speaking");
+    await speak(
+      "judge",
+      firstSentence(note),
+      `${STATE_LABEL[event.status] || event.status} · ${shortId(event.ruling.claim_id)}`,
+    );
+    setTurn("judge");
+
+    const el = cards.get(event.ruling.claim_id);
+    if (el) {
+      setCardState(el, event.status);
+      decorate(el, claim, note);
+      markHit(el, event.status);
+    }
+    addJudgeNote(event, claim);
+    setCredits(event.budgets);
+    offerAddBet(true);                 // balances moved: the odds mean something now
+  } else if (event.type === "objection") {
+    // The question is a question: it never enters the record or the source pack.
+    await showObjectionCard();
+    toast("the court recognises the objection");
+    showGalleryBar(event.question);
+    logline(`Objection from the gallery: ${event.question}`, "objection");
+  } else if (event.type === "objection_answer") {
+    lastVoice = "judge";
+    setSpeaker("judge");
+    setTurn("judge", "speaking");
+    await speak("judge", event.answer, "answer to the gallery");
+    setTurn("judge");
+    addQA(event.question, event.answer);
+    hideGalleryBar();
+  } else if (event.type === "sources_added") {
+    if (event.round === 0 && introFill) { renderIntroPack(event.docs); introFill(); }
+    const titles = event.docs
+      .map(d => { const { type, text } = sourceLabel(d); return `${type} ${String(text).slice(0, 40)}`; })
+      .join(" · ");
+    logline(`+${event.docs.length} source(s), pack now ${event.pack_size} — ${titles}`);
+  } else if (event.type === "verdict") {
+    hideTurn();
+    offerAddBet(false);                // the book is closed
+    presentVerdict(event.verdict);   // async: the stream is never held up
+  } else if (event.type === "done") {
+    RUN_ID = event.run || RUN_ID;
+    setStatus(event.error ? `Failed: ${event.error}` : "Debate complete", false);
+    paintObjectionButton();
+  }
+}
+
+/* ---------------- questions from the gallery ----------------
+   Mid-case they go to POST /objection and the answer comes back through the
+   debate stream; once the verdict is in, the same question goes to POST /ask
+   and the answer comes back in the response. Same judge, same prompt. */
+let RUN_ID = null;
+const OUTSIDE_MARK = "Outside the record:";
+const OBJECTION_MS = 1500;
+
+function paintObjectionButton() {
+  document.getElementById("objection").textContent = liveNow ? "objection!" : "ask the court";
+}
+function showGalleryBar(question) {
+  document.getElementById("gallery-question").textContent = question;
+  document.getElementById("gallery-bar").hidden = false;
+}
+function hideGalleryBar() {
+  document.getElementById("gallery-bar").hidden = true;
+}
+async function showObjectionCard() {
+  const card = document.getElementById("objection-card");
+  card.hidden = false;
+  await sleep(OBJECTION_MS);
+  card.hidden = true;
+}
+/* Newest on top, and an answer the court gave from memory is marked as such -
+   the whole point of the rule is that the audience can see the difference. */
+function addQA(question, answer) {
+  const list = document.getElementById("v-qa");
+  const outside = answer.startsWith(OUTSIDE_MARK);
+  const pair = document.createElement("div");
+  pair.className = "pair" + (outside ? " outside" : "");
+  pair.innerHTML =
+    `<p class="q">${esc(question)}</p>` +
+    (outside ? `<p class="mark">answered from memory, not from the record</p>` : "") +
+    `<p class="a">${esc(answer)}</p>`;
+  list.prepend(pair);
+}
+function galleryNote(text) {
+  document.getElementById("gallery-note").textContent = text;
+}
+function toggleGalleryForm(on) {
+  const form = document.getElementById("gallery-form");
+  const next = on ?? form.hidden;
+  form.hidden = !next;
+  document.getElementById("objection").setAttribute("aria-expanded", String(next));
+  if (next) document.getElementById("gallery-input").focus();
+  else galleryNote("");
+}
+
+async function askTheCourt(question) {
+  const body = liveNow
+    ? { url: "/objection", payload: { question } }
+    : { url: "/ask", payload: { question, run: RUN_ID } };
+  const res = await fetch(body.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body.payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  return data;
+}
+async function submitQuestion(question, note) {
+  const text = question.trim().slice(0, 200);
+  if (!text) return;
+  note("sending…");
+  try {
+    const data = await askTheCourt(text);
+    if (data.answer) {                 // answered straight away (after the verdict)
+      addQA(text, data.answer);
+      note("answered below");
+    } else {
+      playGavel();
+      toast("objection filed", "the court will answer after this round");
+      note(`in the queue — the court answers after this round (${data.queued})`);
+    }
+  } catch (err) {
+    note(String(err.message || err).slice(0, 80));
+  }
+}
+
+/* ---- waiting for an answer ----
+   The question goes on the list the moment it is asked: the wait is part of the
+   exchange, so it is shown as the court considering, not as a frozen form. */
+const CONSIDERING = `${AGENT_NAME.judge} is considering…`;
+
+function addPendingQA(question) {
+  const list = document.getElementById("v-qa");
+  const pair = document.createElement("div");
+  pair.className = "pair pending";
+  pair.innerHTML = `<p class="q">${esc(question)}</p><p class="a waiting">${esc(CONSIDERING)}</p>`;
+  list.prepend(pair);                  // newest question always on top
+  pair.scrollIntoView({ behavior: SCROLL, block: "center" });
+  return pair;
+}
+/* Same cadence as the bubbles on stage, so an answer reads as speech. */
+function typeText(el, text) {
+  if (reducedMotion) { el.textContent = text; return; }
+  el.textContent = "";
+  let i = 0;
+  const timer = setInterval(() => {
+    el.textContent = text.slice(0, ++i);
+    if (i >= text.length) clearInterval(timer);
+  }, 1000 / TYPE_CPS);
+}
+function resolvePendingQA(pair, answer) {
+  const outside = answer.startsWith(OUTSIDE_MARK);
+  pair.classList.remove("pending");
+  pair.classList.toggle("outside", outside);
+  const body = pair.querySelector(".a");
+  body.classList.remove("waiting", "failed");
+  if (outside) {
+    const mark = document.createElement("p");
+    mark.className = "mark";
+    mark.textContent = "answered from memory, not from the record";
+    body.before(mark);
+  }
+  typeText(body, answer);
+}
+function failPendingQA(pair) {
+  pair.classList.remove("pending");
+  const body = pair.querySelector(".a");
+  body.classList.remove("waiting");
+  body.classList.add("failed");
+  body.textContent = "the court could not answer — try again";
+}
+
+/* The verdict-sheet form: lock, show the wait, then fill the same box. */
+async function askFromVerdict() {
+  const input = document.getElementById("v-ask-input");
+  const button = document.querySelector("#v-ask button");
+  const question = input.value.trim().slice(0, 200);
+  if (!question) return;
+
+  input.value = "";
+  input.disabled = true;
+  button.disabled = true;
+  button.textContent = "asking…";
+  const pair = addPendingQA(question);
+
+  try {
+    const data = await askTheCourt(question);
+    if (data.answer) resolvePendingQA(pair, data.answer);
+    else failPendingQA(pair);          // queued instead of answered: not this path
+  } catch (err) {
+    console.error("ask failed", err);
+    failPendingQA(pair);
+  } finally {
+    input.disabled = false;
+    button.disabled = false;
+    button.textContent = "ask";
+    input.focus();
+  }
+}
+
+let liveNow = false;
+
+function setStatus(text, live) {
+  liveNow = !!live;
+  document.getElementById("objection").textContent = liveNow ? "objection!" : "ask the court";
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.classList.toggle("live", !!live);
+  document.getElementById("play").disabled = !!live;   // the menu is hidden while live
+}
+function reset(rounds) {
+  Object.values(feeds).forEach(feed => feed.innerHTML = "");
+  cards.clear();
+  claimsById = {};
+  notesById = {};
+  statusById = {};
+  hideVerdict();
+  initHud(rounds);
+  clearSpeaker();
+  clearBubbles();
+  setTurn(null);
+  offerAddBet(false);
+  QUEUE.length = 0;
+  lastVoice = null;
+  hideGalleryBar();
+  toggleGalleryForm(false);
+  document.getElementById("v-qa").innerHTML = "";
+  RUN_ID = null;
+  paintObjectionButton();
+}
+
+/* ---------------- SSE stream (shared by /debate and /replay) ---------------- */
+async function stream(url, options) {
+  try {
+    const res = await fetch(url, { ...options, signal: aborter.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 120)}`);
+    setStatus("Debate running…", true);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const chunks = buffer.split("\n\n");
+      buffer = chunks.pop();
+      for (const chunk of chunks) {
+        const data = chunk.split("\n").filter(l => l.startsWith("data: ")).map(l => l.slice(6)).join("");
+        if (!data) continue;
+        try { handle(JSON.parse(data)); }
+        catch (err) { console.warn("Malformed event", data, err); }
+      }
+    }
+    if (document.getElementById("status").classList.contains("live")) setStatus("Stream ended", false);
+  } catch (err) {
+    if (err.name !== "AbortError") setStatus(`Failed: ${err.message}`, false);
+  }
+}
+
+async function startMatch({ asset, rounds, url, options, intro }) {
+  reset(rounds);
+  setStatus("Connecting…", true);
+  aborter = new AbortController();
+  // The stream runs behind the fight card: the card needs the source pack, and a
+  // live debate should not sit idle for three seconds.
+  const running = stream(url, options);
+  if (intro) await showIntro(asset, rounds);
+  await running;
+}
+
+/* The menu can be reopened mid-case, so it needs a way out (the X and Escape)
+   and it must say plainly that starting again throws the running case away. */
+let matchStarted = false;
+
+function showMenu(on) {
+  document.getElementById("menu").classList.toggle("show", on);
+  document.getElementById("menu-close").hidden = !matchStarted;
+  const cta = document.getElementById("open-court");
+  cta.textContent = liveNow ? "Abandon case & start new" : "Start the case";
+  cta.classList.toggle("abandon", liveNow);
+  if (on) { stopSinceClock(); toggleGalleryForm(false); }
+  else if (liveNow) startSinceClock();
+}
+
+async function launch({ url, options, asset, rounds, intro }) {
+  plannedTurns = rounds * 3;          // bull, bear and quant speak once per round
+  matchStarted = true;
+  // The opening pick becomes the first ticket, priced at even money: both sides
+  // start on the same balance, so (a+b)/a is exactly 2.
+  TICKETS = BET.side ? [{ side: BET.side, stake: BET.stake, odds: OPENING_ODDS, label: "opening" }] : [];
+  offerAddBet(false);
+  showMenu(false);
+  markEvent();
+  startSinceClock();
+  await startMatch({ asset, rounds, url, options, intro });
+  stopSinceClock();
+}
+
+document.getElementById("open-court").onclick = () => {
+  const asset = currentAsset();
+  const asset_kind = currentKind();
+  const rounds = Number(document.getElementById("rounds").value) || 2;
+  renderAssetCard(asset);
+  aborter?.abort();                     // starting again abandons whatever is running
+
+  // first user gesture: this is the only moment audio may start
+  if (document.getElementById("menu-sound").checked) setSound(true);
+
+  launch({
+    asset, rounds, intro: true,
+    url: "/debate",
+    options: {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        asset,
+        asset_kind,        // "token" keeps EDGAR out: its ticker map would hit an ETF issuer
+        rounds,
+        seed_urls: [],     // EDGAR and DefiLlama build the pack from the ticker
+      }),
+    },
+  });
+};
+
+document.getElementById("play").onclick = () => {
+  const name = document.getElementById("replays").value;
+  if (!name) { setStatus("Pick a saved case first", false); return; }
+  const rounds = Number(document.getElementById("rounds").value) || 2;
+  aborter?.abort();
+  const replayAsset = (name.split("-")[0] || "replay").toUpperCase();
+  renderAssetCard(replayAsset);
+  if (document.getElementById("menu-sound").checked) setSound(true);
+
+  launch({
+    asset: replayAsset, rounds, intro: INTRO_ON_REPLAY,
+    url: `/replay/${encodeURIComponent(name)}?speed=1`,
+    options: { method: "GET" },
+  });
+};
+
+document.getElementById("to-menu").onclick = () => showMenu(true);   // the case keeps running
+
+for (const button of document.querySelectorAll(".bet-side[data-bet]")) {
+  button.onclick = () => selectBet(button.dataset.bet === BET.side ? null : button.dataset.bet);
+}
+document.getElementById("bet-skip").onclick = () => selectBet(null);
+document.getElementById("objection").onclick = () => toggleGalleryForm();
+document.getElementById("gallery-form").onsubmit = async e => {
+  e.preventDefault();
+  const input = document.getElementById("gallery-input");
+  await submitQuestion(input.value, galleryNote);
+  input.value = "";
+};
+document.getElementById("v-ask").onsubmit = e => {
+  e.preventDefault();
+  askFromVerdict();
+};
+document.getElementById("menu-close").onclick = () => showMenu(false);
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (document.getElementById("menu").classList.contains("show") && matchStarted) showMenu(false);
+  else toggleGalleryForm(false);
+});
+buildAmountRows();
+buildAddRows();
+
+fetch("/replays").then(r => r.json()).then(data => {
+  const select = document.getElementById("replays");
+  for (const name of data.replays || []) {
+    select.insertAdjacentHTML("beforeend", `<option value="${esc(name)}">${esc(name)}</option>`);
+  }
+}).catch(() => {});
+
+/* the picker and both panels wait for /assets; a failure leaves the custom field */
+fetch("/assets")
+  .then(r => r.json())
+  .then(data => { ASSETS = data || {}; })
+  .catch(() => {})
+  .finally(() => { initPicker(); renderAssetCard(currentAsset()); selectBet(null); });
+
+initStage();
+initHud(Number(document.getElementById("rounds").value) || null);
+</script>
+</body>
+</html>

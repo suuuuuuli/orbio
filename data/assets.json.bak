@@ -1,0 +1,299 @@
+{
+  "NVDA": {
+    "name": "NVIDIA Corporation",
+    "kind": "equity",
+    "market_cap": "5.30T",
+    "pe_forward": "24.15",
+    "revenue_ttm": "302.97B",
+    "profit_margin": "63.66%",
+    "blurb": "Designs the GPUs and software stack that most AI training and inference runs on.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "AMD": {
+    "name": "Advanced Micro Devices, Inc.",
+    "kind": "equity",
+    "market_cap": "889.85B",
+    "pe_forward": "35.09",
+    "revenue_ttm": "41.31B",
+    "profit_margin": "15.58%",
+    "blurb": "Second-source CPU and AI accelerator vendor competing directly with Nvidia and Intel.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "AVGO": {
+    "name": "Broadcom Inc.",
+    "kind": "equity",
+    "market_cap": "1.66T",
+    "pe_forward": "18.52",
+    "revenue_ttm": "89.10B",
+    "profit_margin": "42.94%",
+    "blurb": "Networking silicon and custom AI accelerators built for hyperscalers, plus infrastructure software.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "MU": {
+    "name": "Micron Technology, Inc.",
+    "kind": "equity",
+    "market_cap": "1.10T",
+    "pe_forward": "9.39",
+    "revenue_ttm": "90.27B",
+    "profit_margin": "55.91%",
+    "blurb": "Memory maker whose high-bandwidth memory is a bottleneck input for AI accelerators.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "HOOD": {
+    "name": "Robinhood Markets, Inc.",
+    "kind": "equity",
+    "market_cap": "93.88B",
+    "pe_forward": "38.31",
+    "revenue_ttm": "4.93B",
+    "profit_margin": "42.01%",
+    "blurb": "Retail brokerage and crypto platform monetising order flow, margin lending and subscriptions.",
+    "as_of": "2026-09-16",
+    "seed_urls": []
+  },
+  "HIMS": {
+    "name": "Hims & Hers Health, Inc.",
+    "kind": "equity",
+    "market_cap": "6.53B",
+    "pe_forward": "72.46",
+    "revenue_ttm": "2.58B",
+    "profit_margin": "-5.51%",
+    "blurb": "Telehealth platform selling subscription treatments direct to consumers.",
+    "as_of": "2026-09-16",
+    "seed_urls": []
+  },
+  "AAPL": {
+    "name": "Apple Inc.",
+    "kind": "equity",
+    "market_cap": "4.92T",
+    "pe_forward": "35.21",
+    "revenue_ttm": "466.82B",
+    "profit_margin": "27.62%",
+    "blurb": "Consumer hardware franchise increasingly monetised through services and its installed base.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "TSLA": {
+    "name": "Tesla, Inc.",
+    "kind": "equity",
+    "market_cap": "1.45T",
+    "pe_forward": "149.25",
+    "revenue_ttm": "103.62B",
+    "profit_margin": "3.67%",
+    "blurb": "Electric vehicle maker priced on autonomy and energy rather than current auto margins.",
+    "as_of": "2026-09-16",
+    "seed_urls": []
+  },
+  "CRWV": {
+    "name": "CoreWeave, Inc.",
+    "kind": "equity",
+    "market_cap": "44.06B",
+    "pe_forward": "—",
+    "revenue_ttm": "7.59B",
+    "profit_margin": "-25.40%",
+    "blurb": "GPU cloud provider renting AI compute, built on heavy debt-financed capex.",
+    "as_of": "2026-09-17",
+    "seed_urls": []
+  },
+  "BB": {
+    "name": "BlackBerry Limited",
+    "kind": "equity",
+    "market_cap": "4.50B",
+    "pe_forward": "42.73",
+    "revenue_ttm": "580.3M",
+    "profit_margin": "10.31%",
+    "blurb": "Embedded software and security vendor whose QNX runs in automotive and robotics systems.",
+    "as_of": "2026-09-16",
+    "seed_urls": []
+  },
+  "SPCX": {
+    "name": "SpaceX",
+    "kind": "equity",
+    "market_cap": "2.04T",
+    "pe_forward": "204.08",
+    "revenue_ttm": "23.04B",
+    "profit_margin": "-35.66%",
+    "blurb": "Launch and satellite broadband operator scaling Starlink ahead of profitability.",
+    "as_of": "2026-09-16",
+    "seed_urls": []
+  },
+  "HYPE": {
+    "name": "Hyperliquid (HYPE)",
+    "kind": "token",
+    "defillama_slug": "hyperliquid",
+    "market_cap": "20.15B",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "Perps exchange running on its own L1; fees from the order book and the HLP vault accrue to the token.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://hyperliquid.gitbook.io/hyperliquid-docs",
+      "https://hyperliquid.xyz"
+    ]
+  },
+  "AERO": {
+    "name": "Aerodrome Finance (AERO)",
+    "kind": "token",
+    "defillama_slug": "aerodrome",
+    "market_cap": "636M",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "Vote-escrow DEX on Base where locked-token votes steer emissions toward pools.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://basescan.org/token/0x940181a94A35A4569E4529A3CDfB74e38FD98631"
+    ]
+  },
+  "SOL": {
+    "name": "Solana (SOL)",
+    "kind": "token",
+    "defillama_chain": "Solana",
+    "market_cap": "63.65B",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "High-throughput L1; the token pays for blockspace and secures the validator set through staking.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://docs.anza.xyz",
+      "https://solana.com"
+    ]
+  },
+  "NEAR": {
+    "name": "NEAR Protocol (NEAR)",
+    "kind": "token",
+    "defillama_chain": "Near",
+    "market_cap": "—",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "Sharded L1 with account abstraction; the token pays fees and is staked by validators.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://near.org",
+      "https://docs.near.org",
+      "https://pages.near.org/papers/the-official-near-white-paper/"
+    ]
+  },
+  "VVV": {
+    "name": "Venice Token (VVV)",
+    "kind": "token",
+    "defillama_slug": "venice",
+    "market_cap": "1.27B",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "Staking token for Venice, a private inference platform: stake grants daily API capacity.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://venice.ai",
+      "https://docs.venice.ai"
+    ]
+  },
+  "CARDS": {
+    "name": "Collector Crypt (CARDS)",
+    "kind": "token",
+    "market_cap": "156M",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "Tokenised trading-card vault: graded physical cards are custodied and traded on-chain.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://docs.collectorcrypt.com"
+    ]
+  },
+  "LIT": {
+    "name": "Lighter (LIT)",
+    "kind": "token",
+    "defillama_slug": "lighter",
+    "market_cap": "1.22B",
+    "pe_forward": "—",
+    "revenue_ttm": "—",
+    "profit_margin": "—",
+    "blurb": "zk-rollup perps exchange; the token is tied to trading fees and market-maker incentives.",
+    "as_of": "2026-09-18",
+    "seed_urls": [
+      "https://lighter.xyz"
+    ]
+  }
+    "HYPE": {
+    "name": "Hyperliquid (HYPE)", "kind": "token", "defillama_slug": "hyperliquid",
+    "market_cap": "20.551B", "fdv": "88.256B", "price": "92.38", "tvl": "6.966B",
+    "fees_30d": "83.39M", "revenue_30d": "65.33M", "holders_revenue_30d": "65.33M",
+    "earnings_annualized": "696.44M", "perp_volume_30d": "240.168B", "open_interest": "7.135B",
+    "blurb": "Perps exchange on its own L1; order-book fees and the HLP vault accrue to the token.",
+    "as_of": "2026-09-18"
+  },
+  "AERO": {
+    "name": "Aerodrome (AERO)", "kind": "token", "defillama_slug": "aerodrome",
+    "market_cap": "637.56M", "fdv": "1.273B", "price": "0.64", "tvl": "358.18M",
+    "fees_30d": "17.45M", "revenue_30d": "14.24M", "holders_revenue_30d": "14.24M",
+    "earnings_annualized": "-12.45M", "incentives_1y": "109.47M", "dex_volume_30d": "14.243B",
+    "blurb": "Base's main DEX; all revenue goes to holders but token incentives exceed it.",
+    "as_of": "2026-09-18"
+  },
+  "SOL": {
+    "name": "Solana (SOL)", "kind": "token", "defillama_chain": "Solana",
+    "market_cap": "65.029B", "fdv": "70.233B", "price": "110.75", "tvl": "6.131B",
+    "stablecoins_mcap": "15.396B", "chain_fees_24h": "813114", "chain_revenue_24h": "91716",
+    "app_revenue_24h": "6.21M", "dex_volume_24h": "2.463B", "active_addresses_24h": "3.04M",
+    "blurb": "High-throughput L1 with the deepest app-layer activity outside Ethereum.",
+    "as_of": "2026-09-18"
+  },
+  "NEAR": {
+    "name": "NEAR Protocol (NEAR)", "kind": "token", "defillama_chain": "Near",
+    "market_cap": "4.756B", "fdv": "4.756B", "price": "3.64", "tvl": "190.19M",
+    "stablecoins_mcap": "80.03M", "chain_fees_24h": "3202", "chain_revenue_24h": "2241",
+    "app_revenue_24h": "126556", "app_fees_24h": "526435", "dex_volume_24h": "95.12M",
+    "active_addresses_24h": "44749", "total_raised": "533.7M",
+    "blurb": "Sharded L1 pivoting toward AI and chain abstraction; DeFi footprint stays small.",
+    "as_of": "2026-09-18"
+  },
+  "VVV": {
+    "name": "Venice (VVV)", "kind": "token", "defillama_slug": "venice",
+    "market_cap": "1.264B", "fdv": "2.131B", "price": "26.29", "tvl": "0",
+    "fees_30d": "794243", "revenue_30d": "794243", "holders_revenue_30d": "794243",
+    "earnings_annualized": "3.51M", "staked": "920.47M (72.84% of mcap)", "total_raised": "65M",
+    "blurb": "Private inference provider; token gates API access and 73% of supply is staked.",
+    "as_of": "2026-09-18"
+  },
+  "CARDS": {
+    "name": "Collector Crypt (CARDS)", "kind": "token", "defillama_slug": "collector-crypt",
+    "market_cap": "156.59M", "fdv": "326.86M", "price": "0.17",
+    "fees_30d": "9.55M", "revenue_30d": "9.55M", "holders_revenue_30d": "0",
+    "dex_volume_30d": "120.47M",
+    "blurb": "Tokenised trading-card marketplace; fees are real but none flow to holders.",
+    "as_of": "2026-09-18"
+  },
+  "LIT": {
+    "name": "Lighter (LIT)", "kind": "token", "defillama_slug": "lighter",
+    "market_cap": "1.223B", "fdv": "4.891B", "price": "4.89", "tvl": "708.44M",
+    "fees_30d": "6.04M", "revenue_30d": "4.64M", "holders_revenue_30d": "3.33M",
+    "earnings_annualized": "65.08M", "perp_volume_30d": "55.353B", "open_interest": "784.22M",
+    "outstanding_fdv": "3.667B", "total_raised": "68M",
+    "blurb": "zk perps exchange competing with Hyperliquid on volume at a fraction of its fees.",
+    "as_of": "2026-09-18"
+  },
+  "PONS": {
+    "name": "Pons (PONS)", "kind": "token", "defillama_slug": "pons",
+    "market_cap": "485.91M", "fdv": "485.91M", "price": "0.71",
+    "fees_30d": "132.86M", "revenue_30d": "23.53M", "holders_revenue_30d": "14.49M",
+    "dex_volume_30d": "2.19B",
+    "blurb": "Fully circulating token capturing a fifth of $133M in monthly fees for holders.",
+    "as_of": "2026-09-18"
+  },
+  "STONK": {
+    "name": "StonkFun (STONK)", "kind": "token", "defillama_slug": "stonkfun",
+    "market_cap": "236.33M", "fdv": "236.33M", "price": "0.28",
+    "fees_30d": "11.93M", "revenue_30d": "11.93M", "holders_revenue_30d": "5.69M",
+    "dex_volume_30d": "242.25M",
+    "blurb": "Tokenised-equity trading venue; half of all revenue is routed to holders.",
+    "as_of": "2026-09-18"
+  }
+}
