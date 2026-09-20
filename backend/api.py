@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import AsyncIterator, Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -195,6 +195,18 @@ def _state_from_events(asset: str, events: list[dict]) -> DebateState:
     return state
 
 
+# Zadna z tych odpowiedzi nie ma sensu w cache przegladarki: index.html zmienia
+# sie przy kazdej poprawce, a /assets po kazdej edycji data/assets.json. Bez
+# naglowka przegladarka stosuje wlasna heurystyke i potrafi pokazywac stara
+# liste aktywow (nowy ticker "nie istnieje", choc serwer go oddaje).
+NO_STORE = {"Cache-Control": "no-store, must-revalidate"}
+
+
+def _fresh(payload: dict) -> JSONResponse:
+    """JSON, ktorego przegladarka nie ma prawa zapamietac."""
+    return JSONResponse(payload, headers=NO_STORE)
+
+
 def _sse(event: dict) -> str:
     """Jedno zdarzenie w formacie Server-Sent Events."""
     return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
@@ -219,11 +231,11 @@ def _save_replay(asset: str, events: list[dict], run_id: Optional[str] = None) -
 def index() -> FileResponse:
     if not FRONTEND.exists():
         raise HTTPException(status_code=404, detail="brak frontend/index.html")
-    return FileResponse(FRONTEND)
+    return FileResponse(FRONTEND, headers=NO_STORE)
 
 
 @app.get("/assets")
-def assets() -> dict:
+def assets() -> JSONResponse:
     """Reference data for the ticker picker and the asset panel.
 
     Hand-maintained in data/assets.json. A missing or broken file is not an
@@ -231,28 +243,30 @@ def assets() -> dict:
     """
     if not ASSET_FILE.exists():
         print(f"[api] brak {ASSET_FILE.name} - frontend poleci bez danych referencyjnych")
-        return {}
+        return _fresh({})
     try:
-        return json.loads(ASSET_FILE.read_text(encoding="utf-8"))
+        data = json.loads(ASSET_FILE.read_text(encoding="utf-8"))
     except ValueError as err:
-        print(f"[api] {ASSET_FILE.name} jest uszkodzony ({err}) - oddaje pusty obiekt")
-        return {}
+        # Recznie edytowany plik potrafi sie zepsuc na brakujacym przecinku.
+        # Mowimy o tym glosno: inaczej picker po prostu jest pusty bez powodu.
+        print(f"[api] {ASSET_FILE.name} jest USZKODZONY ({err}) - oddaje pusty obiekt")
+        return _fresh({})
+    print(f"[api] /assets: {len(data)} tickerow ({', '.join(list(data)[-3:])} ...)")
+    return _fresh(data)
 
 
 @app.get("/limits")
-def limits() -> dict:
+def limits() -> JSONResponse:
     """Ile debat na zywo zostalo na dzis - menu blokuje przycisk na tej podstawie."""
-    return _limits()
+    return _fresh(_limits())
 
 
 @app.get("/replays")
-def replays() -> dict:
+def replays() -> JSONResponse:
     """Lista zapisanych przebiegow - nazwa bez .json trafia do /replay/{name}."""
     if not REPLAY_DIR.exists():
-        return {"replays": []}
-    return {
-        "replays": sorted(p.stem for p in REPLAY_DIR.glob("*.json"))
-    }
+        return _fresh({"replays": []})
+    return _fresh({"replays": sorted(p.stem for p in REPLAY_DIR.glob("*.json"))})
 
 
 @app.post("/debate")

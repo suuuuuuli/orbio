@@ -280,6 +280,7 @@
     "blurb": "Fully circulating token capturing a fifth of $133M in monthly fees for holders.",
     "as_of": "2026-09-18"
   },
+  
   "STONK": {
     "name": "StonkFun (STONK)",
     "kind": "token",
@@ -293,5 +294,15 @@
     "dex_volume_30d": "242.25M",
     "blurb": "Tokenised-equity trading venue; half of all revenue is routed to holders.",
     "as_of": "2026-09-18"
+  },
+  "ORBIO": {
+    "name": "Orbio (ORBIO)",
+    "kind": "token",
+    "market_cap": "57m",
+    "blurb": "Tokenised inference marketplace on Robinhood Chain; CREDIT is prepaid usage, ORBIO captures fees.",
+    "seed_urls": ["https://www.orbio.so/", "https://api-docs.defillama.com/"],
+    "as_of": "2026-09-19"
   }
+
+
 }

@@ -135,9 +135,9 @@
   --orbio-logo: 3rem;                   /* 48px in the menu */
   --t-floor: 2.75rem;                   /* the floor reads large, it lies flat */
   --floor-logo: 4rem;
-  --floor-bottom: 4.5rem;               /* between the podiums, clear of the footer */
+  --floor-bottom: 9.5rem;               /* 80px higher: clear of the OBJECTION button */
   --floor-tilt: 58deg;
-  --floor-opacity: 0.22;
+  --floor-opacity: 0.14;
   --gold: #f2b32e;                      /* warm accent: the court's own colour */
   --gold-bright: #ffd166;               /* hover, one step up */
   --fade-h: 4rem;
@@ -2096,11 +2096,6 @@ button.primary { border-color: var(--judge); }
       <span class="field-label">case</span>
       <select id="asset-pick" aria-label="Asset"></select>
     </label>
-    <input id="asset" value="NVDA" size="8" aria-label="Custom ticker" hidden>
-    <select id="kind" aria-label="Asset kind" hidden>
-      <option value="equity">equity</option>
-      <option value="token">token</option>
-    </select>
 
     <aside id="menu-asset-card" class="asset-panel"></aside>
 
@@ -2712,19 +2707,16 @@ function settleBet(budgets) {
   line.style.setProperty("--bet-colour", net > 0 ? "var(--state-ok)" : "var(--bear)");
 }
 
-/* ---------------- asset picker + reference card ---------------- */
-const CUSTOM = "__custom__";
-
+/* ---------------- asset picker + reference card ----------------
+   The list is exactly the keys of /assets: a ticker with no entry in
+   data/assets.json has no reference data, no seed URLs and no DefiLlama slug,
+   so the debate would open with an almost empty source pack. */
 function currentAsset() {
-  const pick = document.getElementById("asset-pick").value;
-  if (pick !== CUSTOM) return pick;
-  return document.getElementById("asset").value.trim().toUpperCase() || "NVDA";
+  return document.getElementById("asset-pick").value;
 }
 function currentKind() {
-  const ticker = currentAsset();
-  // kind comes from assets.json; only an unlisted ticker needs the viewer to say
-  if (ASSETS[ticker]) return ASSETS[ticker].kind || "equity";
-  return document.getElementById("kind").value;
+  // kind comes from assets.json, never from the viewer
+  return ASSETS[currentAsset()]?.kind || "equity";
 }
 const DASH = "—";
 /* What a token is worth is a different question from what a company is worth,
@@ -2773,24 +2765,15 @@ function renderAssetCard(ticker) {
 }
 function initPicker() {
   const pick = document.getElementById("asset-pick");
-  const custom = document.getElementById("asset");
-  const kind = document.getElementById("kind");
   const tickers = Object.keys(ASSETS);
-  pick.innerHTML = [
-    ...tickers.map(t => `<option value="${t}">${t}</option>`),
-    `<option value="${CUSTOM}">custom…</option>`,
-  ].join("");
-  if (!tickers.length) pick.value = CUSTOM;   // no reference file: custom only
-
-  const sync = () => {
-    const isCustom = pick.value === CUSTOM;
-    custom.hidden = !isCustom;
-    kind.hidden = !isCustom;      // only a custom ticker needs the equity/token call
-    renderAssetCard(currentAsset());
-  };
-  pick.onchange = sync;
-  custom.oninput = () => renderAssetCard(currentAsset());
-  sync();
+  pick.innerHTML = tickers.length
+    ? tickers.map(t => `<option value="${t}">${t}</option>`).join("")
+    : `<option value="">no reference data — check data/assets.json</option>`;
+  // A missing or broken assets.json now blocks the case instead of starting one
+  // the agents cannot source.
+  document.getElementById("open-court").disabled = !tickers.length;
+  pick.onchange = () => renderAssetCard(currentAsset());
+  renderAssetCard(currentAsset());
 }
 
 /* ---------------- stage ---------------- */
