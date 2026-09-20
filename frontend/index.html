@@ -96,13 +96,26 @@
   --page-x: var(--s-4);
   --witness-col: 22rem;
 
-  --actor-w: 21rem;        /* 336px portraits (+20%) */
+  /* THE STAGE SCALES WITH WINDOW HEIGHT.
+     The courtroom art is 1536x864 - exactly 16:9 - and background-size: cover
+     on a 16:9 window means it fills the viewport with no crop. Every feature of
+     the room therefore sits at a FIXED PERCENTAGE OF WINDOW HEIGHT: the lectern
+     tops at 66%, the bench desk at 50%, the floor from 78% down. So the figures
+     standing in that room are placed in vh as well - in px they only lined up
+     at one window size, and the judge was cut off everywhere below it.
+     The clamps keep the portraits readable on a short window and stop them
+     growing past their pixel art on a tall one. */
+  --actor-w: clamp(9rem, 24.9vh, 21rem);   /* square frame: 336px at 1350px tall */
+  --judge-w: clamp(7rem, 20vh, 17rem);     /* the bench is further back: smaller */
   --actor-lift: 0.375rem;
   --t-caption: 1.25rem;    /* 20px agent name under the portrait */
-  --mask-h: 13rem;         /* height of the strip drawn OVER the actors */
-  --fighter-lift: 3.125rem;   /* 50px: another 40px down the podium */
+  --mask-h: 15.4vh;        /* strip drawn OVER the actors: the podium fronts */
+  --fighter-lift: 3.7vh;   /* how far above the strip the fighters stand */
   --actor-bottom: calc(var(--mask-h) + var(--fighter-lift));
-  --judge-bottom: 42.625rem;  /* -40px, still on the throne */
+  /* The judge is the one figure with the HUD directly above it, so it is placed
+     against the STAGE (% of the box that actually shrinks), not against the
+     window - that is what guarantees it is never clipped or hidden by the HUD. */
+  --judge-bottom: min(48vh, 58%);
   --bull-x: 22%;           /* 22% from the left edge, behind the left podium */
   --bear-x: 78%;           /* 22% from the right edge */
   --stage-focus: 68%;      /* vertical crop of the courtroom art */
@@ -135,7 +148,7 @@
   --orbio-logo: 3rem;                   /* 48px in the menu */
   --t-floor: 2.75rem;                   /* the floor reads large, it lies flat */
   --floor-logo: 4rem;
-  --floor-bottom: 9.5rem;               /* 80px higher: clear of the OBJECTION button */
+  --floor-bottom: 11.3vh;               /* floor carving scales with the room */
   --floor-tilt: 58deg;
   --floor-opacity: 0.14;
   --orbillions-logo: min(70vmin, 34rem);   /* the whole screen, near enough */
@@ -409,6 +422,7 @@ button.primary { border-color: var(--judge); }
 .actor[data-agent="bear"] { --role: var(--bear); left: var(--bear-x); }
 .actor[data-agent="judge"] {
   --role: var(--judge); left: 50%;
+  width: var(--judge-w);
   bottom: var(--judge-bottom);
 }
 .actor .frame {
@@ -1510,6 +1524,22 @@ button.primary { border-color: var(--judge); }
 }
 @media (prefers-reduced-motion: reduce) {
   #orbillions img, #orbillions .cry { animation: none; }
+}
+
+/* A 720p or 768p window loses ~30% of its height to the HUD and the top bar, so
+   the speech area gets thin. Type and padding step down (portraits and text are
+   never cut - fitStack() shrinks the stack, then drops whole lines). */
+@media (max-height: 800px) {
+  :root {
+    --t-caption: 1rem;
+    --t-md: 0.8125rem;        /* bubble text */
+    --bubble-max: 18rem;
+    --bubble-gap: var(--press);
+    --bubble-room-gap: 0.75rem;
+    --t-turn: 1.25rem;
+    --t-floor: 2rem;
+  }
+  .actor .caption small { font-size: var(--t-2xs); }
 }
 
 /* the confirmation pop-up */
