@@ -298,8 +298,8 @@
   "ORBIO": {
     "name": "Orbio (ORBIO)",
     "kind": "token",
-    "market_cap": "57m",
-    "blurb": "Tokenised inference marketplace on Robinhood Chain; CREDIT is prepaid usage, ORBIO captures fees.",
+    "market_cap": "ORBILLIONS",
+    "blurb": "Tokenised inference marketplace on Robinhood Chain; CREDIT is prepaid usage, ORBIO captures fees. Destined for Orbillions",
     "seed_urls": ["https://www.orbio.so/", "https://api-docs.defillama.com/"],
     "as_of": "2026-09-19"
   }

@@ -3339,18 +3339,26 @@ function renderScoreline(budgets) {
   const winner = draw ? null : (bull > bear ? "bull" : "bear");
 
   const label = document.getElementById("v-winner");
-  label.textContent = draw ? "Draw" : (AGENT_NAME[winner] || winner);
-  label.style.setProperty("--winner-colour", draw ? "var(--fg)" : `var(--${winner})`);
-  document.getElementById("v-margin").textContent = draw
-    ? `both sides within ${DRAW_MARGIN} credits`
-    : `wins by ${margin} credit${margin === 1 ? "" : "s"}`;
+  label.textContent = easterEgg ? EASTER_CRY : (draw ? "Draw" : (AGENT_NAME[winner] || winner));
+  label.style.setProperty(
+    "--winner-colour",
+    easterEgg ? "var(--brass)" : (draw ? "var(--fg)" : `var(--${winner})`),
+  );
+  document.getElementById("v-margin").textContent = easterEgg
+    ? EASTER_CRY
+    : (draw ? `both sides within ${DRAW_MARGIN} credits`
+            : `wins by ${margin} credit${margin === 1 ? "" : "s"}`);
 
   /* what the result means for the reader, in one line */
   const lean = document.getElementById("v-lean");
-  lean.textContent = draw
-    ? "Draw — no directional lean"
-    : `${AGENT_NAME[winner]} won — we lean more ${winner === "bull" ? "bullish" : "bearish"}`;
-  lean.style.setProperty("--lean-colour", draw ? "var(--fg-dim)" : `var(--${winner})`);
+  lean.textContent = easterEgg
+    ? EASTER_CRY
+    : (draw ? "Draw — no directional lean"
+            : `${AGENT_NAME[winner]} won — we lean more ${winner === "bull" ? "bullish" : "bearish"}`);
+  lean.style.setProperty(
+    "--lean-colour",
+    easterEgg ? "var(--brass)" : (draw ? "var(--fg-dim)" : `var(--${winner})`),
+  );
 
   for (const agent of ["bull", "bear"]) {
     const variant = draw ? "" : (agent === winner ? "-win" : "-lose");
@@ -3595,6 +3603,11 @@ async function play(event) {
 
 /* The whole verdict for an asset with nothing to debate. It covers the sheet
    until the viewer clicks it away - the verdict is underneath, unchanged. */
+/* ORBIO has no case, so its verdict sheet does not pretend otherwise: the
+   result, the margin note and the lean all say the only word in the record. */
+const EASTER_CRY = "orbillions!!";
+let easterEgg = false;
+
 function showOrbillions() {
   const screen = document.getElementById("orbillions");
   screen.hidden = false;
@@ -3830,6 +3843,9 @@ async function stream(url, options) {
 
 async function startMatch({ asset, rounds, url, options, intro }) {
   reset(rounds);
+  // The flag has to be up before the verdict lands, and the verdict arrives
+  // before the orbillions event - so it is set from the asset, not the stream.
+  easterEgg = String(asset).toUpperCase() === "ORBIO";
   setStatus("Connecting…", true);
   aborter = new AbortController();
   // The stream runs behind the fight card: the card needs the source pack, and a

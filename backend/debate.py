@@ -378,10 +378,8 @@ def run_easter_egg(
     verdict = Verdict(
         thesis=EASTER_CRY,
         confidence=1.0,
-        falsifiers=[
-            "Nothing on the record. This was never a debate.",
-            f"Put real data in data/assets.json and {asset} gets a real case.",
-        ],
+        # Nie ma czego falsyfikowac - to nie byla debata, tylko okrzyk.
+        falsifiers=[EASTER_CRY, EASTER_CRY, EASTER_CRY],
         final_budgets={n: st.budget for n, st in state.agents.items()},
     )
     emit({"type": "verdict", "verdict": verdict.model_dump(mode="json")})
