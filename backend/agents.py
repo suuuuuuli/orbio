@@ -49,6 +49,13 @@ _RULES = f"""Rules:
   automation clears both the quote and the URL.
 - If you have no source, set source_url to null and DO NOT invent a URL.
   An invented link is punished harder than no source at all.
+- A source marked OPINION PIECE (opinia=tak in the block header) is somebody's
+  ARGUMENT, not a record of what happened. Citing one is allowed, but the claim
+  must be claim_type="interpretive" and its text must say whose thesis it is
+  (e.g. "the author of the ORBIO thread argues that ..."), never state it as
+  settled fact. The automation drops any factual or quantitative claim sourced
+  to an opinion piece. Figures inside such a document are rhetoric: do not treat
+  them as data and do not compute with them.
 - stake (1-20) reflects how much you are genuinely willing to risk. Your budget is
   finite, and the stake is forfeited when a claim is refuted or turns out unsourced.
 - The SUM of stakes across your claims this round must not exceed {MAX_STAKE_PER_ROUND}.
@@ -109,6 +116,12 @@ What you may compute:
 - the computation must concern an ECONOMIC QUANTITY taken from the source pack or
   from claims made in the debate (revenue, margin, market share, valuation, growth
   rate, price, debt and so on). The numbers in code must come from there.
+- An OPINION PIECE (opinia=tak in the block header) is NOT material for you. Its
+  figures are somebody's argument - quoted market caps, projected revenue, a TAM
+  estimate off a blog post. Do not put them in code, not even as an assumption:
+  the automation does not accept them as grounding and the computation gets
+  rejected. If such a figure is the only thing available, that is an
+  information_gap, not a calculation.
 - ON-CHAIN data is valid material: a [SOURCE ... typ=onchain] block carries total
   value locked, per-chain breakdowns, a dated TVL series and - for protocols -
   fees and revenue over 24h / 7d / 30d / all time. Percentage changes, averages,
@@ -219,6 +232,33 @@ def _numbers_in(text: str) -> set[str]:
     return found
 
 
+def _reject_opinion_facts(agent: str, claims: list[Claim], docs: list[SourceDoc]) -> list[Claim]:
+    """Twierdzenie oparte na opinii moze byc tylko interpretacja.
+
+    Opinia to czyjas teza. Zacytowana jako fakt zamienia cudzy argument w ustalenie
+    debaty - a stad juz tylko krok do tego, ze druga strona "obala" zdanie, ktore
+    nigdy nie bylo faktem. Wiec: interpretive albo wypada.
+    """
+    opinie = {_normalize_url(d.url) for d in docs if d.opinion}
+    if not opinie:
+        return claims
+
+    zostaje: list[Claim] = []
+    for claim in claims:
+        if (
+            claim.source_url
+            and _normalize_url(claim.source_url) in opinie
+            and claim.claim_type != "interpretive"
+        ):
+            print(
+                f"[{agent}] odrzucam [{claim.id}]: {claim.claim_type} oparte na opinii "
+                f"({claim.source_url}) - opinie wolno powolywac tylko jako interpretacje"
+            )
+            continue
+        zostaje.append(claim)
+    return zostaje
+
+
 def _reject_groundless_code(
     claims: list[Claim],
     docs: list[SourceDoc],
@@ -229,9 +269,15 @@ def _reject_groundless_code(
     Bez tego quant liczy cokolwiek - wlasne zalozenia, metadane areny albo
     liczby z pamieci modelu - i podaje to jako dowod. Zrodlem liczb moze byc
     tresc zrodel albo twierdzenia (wraz z ich wynikami) postawione w debacie.
+
+    Dokumenty-opinie sa z tego WYLACZONE: liczba w czyims watku ("VVV wyceniane
+    na 1B") jest argumentem, nie pomiarem, a policzona daje wynik, ktory wyglada
+    jak dowod. Lepiej luka niz mnoznik z cudzej retoryki.
     """
     grunt: set[str] = set()
     for doc in docs:
+        if doc.opinion:
+            continue
         grunt |= _numbers_in(doc.text)
         grunt |= _numbers_in(doc.title)
     for claim in state.claims:
@@ -364,6 +410,7 @@ def _run_agent(
                 claim.source_url = None
                 claim.source_quote = None
 
+    claims = _reject_opinion_facts(agent, claims, docs)
     claims = _enforce_gap_limits(agent, claims)
 
     total_stake = sum(c.stake or 0 for c in claims)

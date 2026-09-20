@@ -1,0 +1,61 @@
+[opinion] thread arguing the bull case for $ORBIO
+I still think 
+$ORBIO
+ is the most asymmetric project on Robinhood Chain. This is a net-new vertical, with all the right levers in a world where AI demand is accelerating.
+
+Yes, inference marketplaces have been tried in crypto. But none have worked at scale. With CREDIT, akin to DIEM, you now have succeeded at tokenizing inference. And in doing so, you basically unlock credits for an increasingly agentic world. Agents need fuel they can buy and use without a human in the loop; This is the start of inference as an onchain commodity. 
+
+This is obviously a pro-sumer application; but that's fine because the largest winners of AI inference are individuals and small teams, not enterprises. Enterprises are either A) developing in-house model harnesses for privacy purposes, or B) have infinite budget for AI
+
+And people treat that like a bear case - I don't see a problem with being for consumers. The TAM for consumer inference is still huge - Menlo Ventures State of Consumer AI est. 1.7b - 1.8b use AI tools ; at $20/m that's 432b a year. Also, in their enterprise report, product-led growth drives 27% of AI spend, and shadow AI (employees paying on their own) pushes that closer to 40%. Cursor hit $200M in revenue before hiring a single enterprise sales rep. 
+
+There is a clear latent demand for cheap inference amongst pro-sumers. The unlocks are clear - it can become the payment layer for AI agents; More users buying credits leads to more demand for CREDIT, which makes staking ORBIO more valuable, which raises the ORBIO price, which creates more trading fees, which funds more discounts, which brings in more users. As long as it keeps spinning, each part feeds the others.
+
+It combines three hot themes: AI agents, tokenized real-world assets, and Robinhood Chain. The NVDA-linked fee route adds to that. In a strong market, a story this clean can attract a lot of capital, which itself funds the subsidy for longer.
+
+And of course, above it all, the man pushing this himself - 
+@0x_aster
+ is a cracked dev who has shown his capabililties are far beyond the norm; Multiple updates within a week, clear direction - this is founder-market fit. 
+
+In crypto, actions carry way more weight than words. And look at what he's shipped man... a working gateway, a live orderbook, and now tokenized inference. The man is A MACHINE. This is what AI x strong founders can do - go beyond 10x engineer to become a 10,000x engineer. HE'S CRACKED!
+
+Founder-market fit matters more in this sector than most. A team that ships slowly gets left behind by the market itself. 
+
+And for the bear takes:
+
+Q: DIEM already does this, why do we need another one
+
+- DIEM is precisely the success case. VVV is valued at 1B. ORBIO is valued at 15m. Also, VVV is going in the direction of private AI. ORBIO is going in the direction of serving the layer of inference for consumers across the world. CREDIT is $1 of usage you hold until you need it. Burst-heavy users (agents running a big job, devs shipping a feature) don't use the same amount every day. They need compute they can stockpile, buy at a discount, and spend in one go.
+
+Lastly, markets rarely have one winner. Stablecoins didn't stop at USDT. Venice proved people will pay for tokenized inference. There is room for a second design.
+
+Q: It's just an OpenRouter reseller. There's no moat.
+
+Fair take. Yes, bits can be copied, there's no moat there. The moat is the market - liquidity begets liquidity in any marketplace. There's 20 different perp dexes. Who wins? The most liquid markets with the most volume traded on it. 
+
+And obv there is no confirmed answer, but ultimately, that's what markets are - I'm betting on this
+
+Q: "They could be shut down"
+
+This is the most legitimate bear take, yes. Platform risk is real for any aggregator. But labs want volume, and resellers bring demand they wouldn't otherwise get. Venice has run Claude, GPT and Gemini through a token model at scale, which suggests it can work.
+
+But on top of that, as the world moves towards open source, this becomes less and less of a risk ;
+
+Anyways, send it 
+
+
+
+Orbio now pours its platform revenue straight back into the market.
+
+Half buys back ORBIO and stakes it. Protocol owned inference, backstopping the book at 20% off.
+
+Half buys the inference itself and mints CREDIT against it. Fresh supply.
+
+
+Introducing CREDIT: tokenized inference you can own, trade, transfer and use.
+
+Stake ORBIO to earn CREDIT. Claim it, sell it on the onchain order book, swap it on Uniswap, or activate it to power your AI.
+
+Access your API key securely with a wallet signature.
+
+Your available inference balance has been airdropped to your wallet as CREDIT.

@@ -25,6 +25,16 @@ SourceType = Literal["filing", "article", "pdf", "onchain", "reference"]
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "data" / "cache"
 
+# Dokumenty wkladane recznie do repozytorium - notatki, watki, analizy. Nie ma
+# ich pod zadnym adresem, wiec nie da sie ich pobrac; czytamy je z dysku.
+DOCS_DIR = Path(__file__).resolve().parent.parent / "data" / "docs"
+LOCAL_PREFIXES = ("file:", "data/docs/")
+
+# Znacznik na poczatku pliku (albo ".opinion." w nazwie) mowi, ze dokument jest
+# czyjas teza, nie zrodlem faktow. Znacznik wycinamy z tresci, zeby nie psul
+# cytatow.
+_OPINION_MARK = "[opinion]"
+
 # Opisowy UA Z ADRESEM KONTAKTOWYM - oba warunki sprawdzone na zywo:
 # podszywanie sie pod Chrome dostaje 403 z Wikipedii, opisowy UA bez kontaktu
 # tez dostaje 403, dopiero UA z "+https://..." dostaje 200.
@@ -142,6 +152,9 @@ class SourceDoc(BaseModel):
     published_at: Optional[date] = None
     source_type: SourceType
     text: str
+    # Dokument-opinia: wolno sie na niego powolywac jako na CZYJAS teze, ale nie
+    # jako na ustalony fakt, a liczb z niego nie wolno liczyc (patrz agents.py).
+    opinion: bool = False
 
 
 def _load_cached(url: str) -> Optional[SourceDoc]:
@@ -170,6 +183,66 @@ def _store_cached(doc: SourceDoc) -> None:
     )
 
 
+def is_local_ref(ref: str) -> bool:
+    """Czy wpis wskazuje plik na dysku, a nie adres do pobrania."""
+    return ref.startswith(LOCAL_PREFIXES)
+
+
+def _local_path(ref: str) -> Path:
+    """'file://notatka.txt', 'file:notatka.txt', 'data/docs/notatka.txt' -> sciezka.
+
+    Sama nazwa pliku (bez katalogow) szukana jest w data/docs/. Sciezka z
+    katalogami liczona jest od korzenia repozytorium.
+    """
+    raw = ref
+    for prefix in ("file://", "file:"):
+        if raw.startswith(prefix):
+            raw = raw[len(prefix):]
+            break
+    raw = raw.lstrip("/")
+    path = Path(raw)
+    if len(path.parts) == 1:
+        return DOCS_DIR / path
+    return DOCS_DIR.parent.parent / path
+
+
+def load_local_doc(ref: str) -> Optional[SourceDoc]:
+    """Dokument z dysku. Brak pliku albo pusta tresc -> None z logiem."""
+    path = _local_path(ref)
+    try:
+        text = path.read_text(encoding="utf-8").strip()
+    except OSError as err:
+        print(f"[sources] pominieto (nie moge odczytac pliku: {type(err).__name__}): {ref}")
+        return None
+
+    if len(text) < MIN_SOURCE_CHARS:
+        print(
+            f"[sources] pominieto (plik ma {len(text)} zn. < {MIN_SOURCE_CHARS}): {ref}"
+        )
+        return None
+
+    # Opinia: znacznik w pierwszej linii albo ".opinion." w nazwie pliku.
+    head, _, rest = text.partition("\n")
+    opinion = ".opinion." in path.name.lower()
+    if head.strip().lower().startswith(_OPINION_MARK):
+        opinion = True
+        text = rest.strip()                  # znacznik nie jest trescia do cytowania
+
+    # Data modyfikacji pliku - jedyna data, jaka mamy dla dokumentu z dysku.
+    published = date.fromtimestamp(path.stat().st_mtime)
+    doc = SourceDoc(
+        url=f"file://{path.name}",
+        title=path.stem.replace("_", " ").replace("-", " "),
+        published_at=published,
+        source_type="article",
+        text=text[:MAX_SOURCE_CHARS],
+        opinion=opinion,
+    )
+    rodzaj = "OPINIA" if opinion else "dokument"
+    print(f"[sources] z dysku ({len(doc.text)} zn., {rodzaj}, {published}): {doc.url}")
+    return doc
+
+
 def fetch_sources(
     urls: list[str],
     allowlist: Optional[list[str]] = None,
@@ -192,6 +265,14 @@ def fetch_sources(
         follow_redirects=True,
     ) as client:
         for url in urls:
+            # Plik z repozytorium nie ma domeny, wiec allowlista go nie dotyczy -
+            # trafil tam recznie, tak samo jak seedy z assets.json.
+            if is_local_ref(url):
+                doc = load_local_doc(url)
+                if doc is not None:
+                    docs.append(doc)
+                continue
+
             if not _domain_allowed(url, allowlist):
                 print(f"[sources] pominieto (poza allowlista, tier={tier_of(url)}): {url}")
                 continue
@@ -386,9 +467,20 @@ def render_for_prompt(docs: list[SourceDoc]) -> str:
     blocks = []
     for i, doc in enumerate(docs, start=1):
         published = doc.published_at.isoformat() if doc.published_at else "brak"
+        # Ostrzezenie stoi W BLOKU, a nie obok niego: agent czyta tresc razem z
+        # naglowkiem, wiec etykieta musi byc tam, gdzie patrzy.
+        ostrzezenie = (
+            "\nTHIS DOCUMENT IS AN OPINION PIECE. It is somebody's argument, not "
+            "established fact. You may cite it only as that person's thesis, with "
+            "claim_type=\"interpretive\". The numbers in it are rhetoric, not data - "
+            "do not compute with them.\n"
+            if doc.opinion
+            else ""
+        )
         blocks.append(
-            f"[ZRODLO id=S{i} url={doc.url} data={published} typ={doc.source_type}]\n"
-            f"{doc.title}\n\n{doc.text}\n"
+            f"[ZRODLO id=S{i} url={doc.url} data={published} typ={doc.source_type}"
+            f"{' opinia=tak' if doc.opinion else ''}]\n"
+            f"{doc.title}\n{ostrzezenie}\n{doc.text}\n"
             f"[/ZRODLO]"
         )
     return "\n\n".join(blocks)

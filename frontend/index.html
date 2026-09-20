@@ -126,6 +126,18 @@
   --parchment: #efe3cc;                 /* cream, not white */
   --parchment-dim: #a89679;
   --wood-lift: #3b2a20;                 /* one step lighter than the panel: hover */
+
+  /* Orbio mark: ivory body, brass ring - taken from the logo itself */
+  --ivory: #efe7d8;
+  --brass: #c9a24a;
+  --engrave: #2a1a0c;                   /* the shadow that makes it look cut in */
+  --t-orbio: 1.75rem;                   /* 28px in the menu */
+  --orbio-logo: 3rem;                   /* 48px in the menu */
+  --t-floor: 2.75rem;                   /* the floor reads large, it lies flat */
+  --floor-logo: 4rem;
+  --floor-bottom: 4.5rem;               /* between the podiums, clear of the footer */
+  --floor-tilt: 58deg;
+  --floor-opacity: 0.22;
   --gold: #f2b32e;                      /* warm accent: the court's own colour */
   --gold-bright: #ffd166;               /* hover, one step up */
   --fade-h: 4rem;
@@ -1396,6 +1408,62 @@ button.primary { border-color: var(--judge); }
   color: var(--parchment);
 }
 
+/* ---------------- the Orbio mark ---------------- */
+.orbio-mark {
+  display: flex; align-items: center; justify-content: center; gap: var(--s-3);
+  margin: var(--s-6) 0 var(--s-5);
+  font-family: var(--font-pixel);
+  font-size: var(--t-orbio);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ivory);
+}
+.orbio-mark img {
+  width: var(--orbio-logo); height: auto;
+  image-rendering: pixelated;
+}
+.orbio-mark b { color: var(--brass); font-weight: 700; }
+.orbio-mark.small {
+  margin: var(--s-4) 0 0;
+  font-size: var(--t-sm);
+  gap: var(--s-2);
+}
+.orbio-mark.small img { width: var(--t-2xl); }
+
+/* Cut into the floorboards: laid flat with a perspective tilt, brass on wood,
+   with a dark edge under it so it reads as a groove rather than a sticker. */
+.floor-mark {
+  position: absolute; left: 50%; bottom: var(--floor-bottom); z-index: 3;
+  display: flex; align-items: center; gap: var(--s-4);
+  margin: 0;
+  transform: translateX(-50%) perspective(600px) rotateX(var(--floor-tilt));
+  transform-origin: center bottom;
+  opacity: var(--floor-opacity);
+  filter: blur(0.5px);
+  pointer-events: none;                 /* decoration: never in the way of a click */
+  white-space: nowrap;
+}
+.floor-mark span {
+  font-family: var(--font-pixel);
+  font-size: var(--t-floor);
+  font-weight: 700;
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--brass);
+  text-shadow: 0 var(--rail) 0 var(--engrave), 0 calc(var(--rail) * -1) 0 rgb(255 255 255 / 12%);
+}
+.floor-mark img {
+  width: var(--floor-logo); height: auto;
+  image-rendering: pixelated;
+}
+/* On a short or narrow window the floor strip is mostly podium: the carving
+   would climb onto the fighters, so it goes. */
+@media (max-height: 800px), (max-width: 900px) {
+  .floor-mark { display: none; }
+}
+
 /* the confirmation pop-up */
 #toast {
   position: fixed; top: var(--toast-top); left: 50%; z-index: 58;
@@ -1876,6 +1944,13 @@ button.primary { border-color: var(--judge); }
 
   <div class="mask" aria-hidden="true"></div>
 
+  <!-- Cut into the floorboards between the two podiums. Decoration only: it sits
+       under every control and never takes a click. -->
+  <p class="floor-mark" aria-hidden="true">
+    <img src="assets/orbio-pixel.png" alt="">
+    <span>powered by orbio</span>
+  </p>
+
   <!-- Directly under each fighter's name plate. Outside #stage on purpose:
        inside it the podium mask would cover the row. Positioned by measuring
        the caption (see placeSideBets), because the portraits are anchored in
@@ -1996,6 +2071,10 @@ button.primary { border-color: var(--judge); }
           <h3>Evidence on the record</h3>
           <ul id="intro-pack"></ul>
           <p class="empty" id="intro-pack-empty">waiting for the source pack…</p>
+          <p class="orbio-mark small">
+            <img src="assets/orbio-pixel.png" alt="Orbio">
+            <span>powered by <b>orbio</b></span>
+          </p>
         </div>
         <p class="hint">click to skip</p>
       </div>
@@ -2072,6 +2151,11 @@ button.primary { border-color: var(--judge); }
 
     <button type="button" id="open-court" class="primary big">Start the case</button>
     <p class="fine" id="menu-note"></p>
+
+    <p class="orbio-mark">
+      <img src="assets/orbio-pixel.png" alt="Orbio">
+      <span>powered by <b>orbio</b></span>
+    </p>
 
     <div class="replay-block">
       <p class="field-label">replay a past case</p>
