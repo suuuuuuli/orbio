@@ -138,6 +138,8 @@
   --floor-bottom: 9.5rem;               /* 80px higher: clear of the OBJECTION button */
   --floor-tilt: 58deg;
   --floor-opacity: 0.14;
+  --orbillions-logo: min(70vmin, 34rem);   /* the whole screen, near enough */
+  --orbillions-shake: 1rem;                /* how far the logo is thrown */
   --gold: #f2b32e;                      /* warm accent: the court's own colour */
   --gold-bright: #ffd166;               /* hover, one step up */
   --fade-h: 4rem;
@@ -1464,6 +1466,52 @@ button.primary { border-color: var(--judge); }
   .floor-mark { display: none; }
 }
 
+/* ---------------- ORBILLIONS ---------------- */
+#orbillions {
+  position: fixed; inset: 0; z-index: 70;    /* over the verdict sheet */
+  display: grid; place-content: center; justify-items: center;
+  gap: var(--s-4);
+  background: var(--ink);
+  cursor: pointer;
+  overflow: hidden;
+}
+#orbillions[hidden] { display: none; }
+#orbillions img {
+  width: var(--orbillions-logo); height: auto;
+  image-rendering: pixelated;
+  animation: orbillions-shake 90ms steps(2, end) infinite;
+}
+#orbillions .cry {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-4xl);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--brass);
+  text-shadow: var(--shadow-hard);
+  animation: orbillions-shake 70ms steps(2, end) infinite reverse;
+}
+#orbillions .hint {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xs);
+  text-transform: uppercase;
+  color: var(--ivory);
+  opacity: 0.6;
+}
+/* Hard, unsmoothed jumps - the same steps() language as every other hit in the
+   arena, just louder. */
+@keyframes orbillions-shake {
+  0%   { transform: translate(calc(var(--orbillions-shake) * -1), var(--orbillions-shake)) rotate(-2deg); }
+  25%  { transform: translate(var(--orbillions-shake), calc(var(--orbillions-shake) * -0.6)) rotate(2deg); }
+  50%  { transform: translate(calc(var(--orbillions-shake) * 0.6), var(--orbillions-shake)) rotate(-1deg); }
+  75%  { transform: translate(calc(var(--orbillions-shake) * -0.8), calc(var(--orbillions-shake) * -1)) rotate(3deg); }
+  100% { transform: translate(var(--orbillions-shake), var(--orbillions-shake)) rotate(-2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #orbillions img, #orbillions .cry { animation: none; }
+}
+
 /* the confirmation pop-up */
 #toast {
   position: fixed; top: var(--toast-top); left: 50%; z-index: 58;
@@ -2165,6 +2213,14 @@ button.primary { border-color: var(--judge); }
 
 <!-- One pop-up for every confirmation, queued so two never overlap. It never
      takes clicks: it is a receipt, not a dialog. -->
+<!-- ORBIO has no case to argue, so the court skips straight to the only thing
+     anyone was going to say. -->
+<div id="orbillions" hidden>
+  <img src="assets/orbio-pixel.png" alt="">
+  <p class="cry">orbillions!!</p>
+  <p class="hint">click to see the verdict</p>
+</div>
+
 <div id="toast" aria-live="polite">
   <p class="line"></p>
   <p class="sub" hidden></p>
@@ -3523,6 +3579,8 @@ async function play(event) {
       .map(d => { const { type, text } = sourceLabel(d); return `${type} ${String(text).slice(0, 40)}`; })
       .join(" · ");
     logline(`+${event.docs.length} source(s), pack now ${event.pack_size} — ${titles}`);
+  } else if (event.type === "orbillions") {
+    showOrbillions();
   } else if (event.type === "verdict") {
     hideTurn();
     offerAddBet(false);                // the book is closed
@@ -3533,6 +3591,15 @@ async function play(event) {
     refreshLimits();                   // one run fewer today
     paintObjectionButton();
   }
+}
+
+/* The whole verdict for an asset with nothing to debate. It covers the sheet
+   until the viewer clicks it away - the verdict is underneath, unchanged. */
+function showOrbillions() {
+  const screen = document.getElementById("orbillions");
+  screen.hidden = false;
+  playGavel();
+  screen.onclick = () => { screen.hidden = true; };
 }
 
 /* ---------------- questions from the gallery ----------------
@@ -3714,6 +3781,7 @@ function reset(rounds) {
   offerAddBet(false);
   QUEUE.length = 0;
   lastVoice = null;
+  document.getElementById("orbillions").hidden = true;
   hideGalleryBar();
   toggleGalleryForm(false);
   document.getElementById("v-qa").innerHTML = "";

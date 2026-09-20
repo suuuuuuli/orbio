@@ -291,6 +291,104 @@ def _serve_objections(
         })
 
 
+# ---------------------------------------------------------------------------
+# ORBIO
+#
+# Za malo danych na debate: brak raportow, brak sluga DefiLlamy, jeden wpis
+# referencyjny. Zamiast wypuszczac cztery modele na pusty pakiet - i placic za
+# runde, ktora skonczylaby sie samymi unsourced - arena odgrywa gotowa scene.
+# Zadnego wywolania bramki, zadnego zajetego slotu z limitu dobowego.
+# ---------------------------------------------------------------------------
+
+EASTER_ASSET = "ORBIO"
+EASTER_CRY = "ORBILLIONS!!"
+
+
+def is_easter_egg(asset: str) -> bool:
+    return asset.strip().upper() == EASTER_ASSET
+
+
+def run_easter_egg(
+    asset: str,
+    emit: EventSink,
+    verbose: bool = True,
+) -> tuple[DebateState, Verdict]:
+    """Jedna runda, trzy okrzyki, werdykt. Ksztalt zdarzen jak w zwyklej debacie.
+
+    Zapisuje sie do replaya tak samo jak kazdy inny przebieg, wiec odtworzony
+    wyglada identycznie.
+    """
+    if verbose:
+        print(f"[debate] {asset}: tryb ORBILLIONS - zero wywolan modelu")
+
+    state = DebateState(
+        asset=asset,
+        asset_kind="token",
+        agents={
+            name: AgentState(agent=name, budget=CREDIBILITY_BUDGET)
+            for name in ("bull", "bear", "quant")
+        },
+        current_round=1,
+    )
+
+    # Pakiet: sam wpis referencyjny z assets.json, zeby karta walki miala co
+    # pokazac. Nic nie pobieramy - to lokalny plik.
+    reference = asset_reference_doc(asset, asset_meta(asset))
+    if reference is not None:
+        emit({
+            "type": "sources_added",
+            "round": 0,
+            "docs": [_doc_event(reference)],
+            "pack_size": 1,
+        })
+
+    emit({"type": "round_start", "round": 1, "rounds": 1})
+
+    for agent in ("bull", "bear"):
+        claim = state.add_claim(
+            Claim(
+                agent=agent,
+                round=1,
+                text=EASTER_CRY,
+                claim_type="interpretive",
+                stake=20,
+                confidence=1.0,
+            )
+        )
+        emit({"type": "claim", "round": 1, "claim": claim.model_dump(mode="json")})
+
+    # Sedzia mowi to samo - jego glos w arenie to adnotacja przy werdykcie.
+    for claim in state.claims:
+        claim.status = "verified"
+        claim.judge_note = EASTER_CRY
+        emit({
+            "type": "ruling",
+            "round": 1,
+            "ruling": {
+                "claim_id": claim.id,
+                "new_status": "verified",
+                "note": EASTER_CRY,
+                "calibration_penalty": 0,
+            },
+            "status": "verified",
+            "judge_note": EASTER_CRY,
+            "budgets": {n: st.budget for n, st in state.agents.items()},
+        })
+
+    verdict = Verdict(
+        thesis=EASTER_CRY,
+        confidence=1.0,
+        falsifiers=[
+            "Nothing on the record. This was never a debate.",
+            f"Put real data in data/assets.json and {asset} gets a real case.",
+        ],
+        final_budgets={n: st.budget for n, st in state.agents.items()},
+    )
+    emit({"type": "verdict", "verdict": verdict.model_dump(mode="json")})
+    emit({"type": "orbillions", "asset": asset, "cry": EASTER_CRY})
+    return state, verdict
+
+
 def run_debate(
     asset: str,
     asset_kind: AssetKind = "equity",
@@ -314,6 +412,10 @@ def run_debate(
     def emit(event: dict) -> None:
         if on_event is not None:
             on_event(event)
+
+    if is_easter_egg(asset):
+        return run_easter_egg(asset, emit, verbose=verbose)
+
     allowlist = allowlist_for(tiers or DEFAULT_TIERS)
 
     # Jeden kontener na cala debate - kolejne wywolania kwanta trafiaja do tego

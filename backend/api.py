@@ -35,7 +35,7 @@ from config import (
     MAX_LIVE_DEBATES_PER_DAY,
     ROUNDS,
 )
-from debate import run_debate
+from debate import is_easter_egg, run_debate
 from judge import MAX_QUESTION_CHARS, answer_question
 from models import AgentState, AssetKind, Claim, DebateState
 from sources import SourceDoc
@@ -56,6 +56,7 @@ REPLAY_DELAYS = {
     "ruling": 0.9,
     "sources_added": 0.5,
     "objection": 1.5,          # tyle trwa przerywnik OBJECTION! we frontendzie
+    "orbillions": 0.8,
     "objection_answer": 1.0,
     "verdict": 1.2,
     "done": 0.0,
@@ -276,7 +277,9 @@ async def debate(request: DebateRequest) -> StreamingResponse:
     # Kolejnosc ma znaczenie: bez kodu nie ma po co patrzec na limit, a slot
     # zajmujemy PRZED zwrotem strumienia, bo model rusza razem z pierwsza runda.
     _check_access(request.access_code)
-    _claim_live_slot()
+    # Scena ORBILLIONS nie wola modelu, wiec nie zjada dziennego limitu.
+    if not is_easter_egg(request.asset):
+        _claim_live_slot()
 
     run_id = f"{request.asset.lower()}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
